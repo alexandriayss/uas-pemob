@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 import '../models/product_model.dart';
+import 'order_create_page.dart';
 
 class ProductDetailPage extends StatefulWidget {
   final int productId;
@@ -155,8 +156,21 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: () {
-                            // TODO: aksi beli / tambah ke keranjang
+                          onPressed: () async {
+                            final result = await Navigator.push<bool>(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => OrderCreatePage(product: p),
+                              ),
+                            );
+
+                            if (result == true && context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Order berhasil dibuat'),
+                                ),
+                              );
+                            }
                           },
                           child: const Text('Beli Sekarang'),
                         ),

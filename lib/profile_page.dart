@@ -131,40 +131,6 @@ class _ProfilePageState extends State<ProfilePage> {
 
             const SizedBox(height: 24),
 
-            // Pengaturan (dummy)
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Pengaturan',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Column(
-                children: [
-                  ListTile(
-                    leading: const Icon(Icons.lock),
-                    title: const Text('Ubah Password'),
-                    onTap: () {
-                      // TODO: arahkan ke halaman ubah password
-                    },
-                  ),
-                  const Divider(height: 0),
-                  ListTile(
-                    leading: const Icon(Icons.settings),
-                    title: const Text('Pengaturan Aplikasi'),
-                    onTap: () {},
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
             // Tombol Logout
             SizedBox(
               width: double.infinity,

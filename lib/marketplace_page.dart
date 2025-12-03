@@ -8,6 +8,7 @@ import 'product_detail_page.dart';
 import 'profile_page.dart';
 import 'my_products_page.dart';
 import 'my_orders_page.dart';
+import 'my_sales_page.dart';
 
 class MarketplacePage extends StatefulWidget {
   const MarketplacePage({super.key});
@@ -23,6 +24,7 @@ class _MarketplacePageState extends State<MarketplacePage> {
     _BerandaPage(),
     MyOrdersPage(),
     MyProductsPage(),
+    MySalesPage(),
     _ProfilUserPage(),
   ];
 
@@ -42,6 +44,10 @@ class _MarketplacePageState extends State<MarketplacePage> {
           BottomNavigationBarItem(
             icon: Icon(Icons.inventory_2),
             label: 'Produk Saya',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.sell),
+            label: 'Penjualan Saya',
           ),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
         ],

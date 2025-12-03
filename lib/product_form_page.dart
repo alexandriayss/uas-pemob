@@ -168,27 +168,73 @@ class _CreateEditProductPageState extends State<CreateEditProductPage> {
     final p = widget.product!;
     final uri = Uri.parse('http://mortava.biz.id/api/products/${p.id}');
 
+    final name = _nameC.text.trim();
+    final category = _categoryC.text.trim();
+    final description = _descriptionC.text.trim();
+    final priceText = _priceC.text.trim();
+    final offerText = _offerPriceC.text.trim();
+
+    // parsing price & offer (kalau kosong, biarkan null)
+    int? price = priceText.isNotEmpty ? int.tryParse(priceText) : null;
+    int? offerPrice = offerText.isNotEmpty ? int.tryParse(offerText) : null;
+
+    if (priceText.isNotEmpty && price == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Harga harus berupa angka')));
+      return;
+    }
+    if (offerText.isNotEmpty && offerPrice == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Harga promo harus berupa angka')),
+      );
+      return;
+    }
+
+    // payload bisa diisi sebagian atau semua field
+    final Map<String, dynamic> payload = {
+      'name': name,
+      'category': category,
+      'description': description,
+    };
+
+    if (price != null) payload['price'] = price;
+    if (offerPrice != null) payload['offer_price'] = offerPrice;
+
+    debugPrint('Update product payload: $payload');
+
     final response = await http.put(
       uri,
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
-      body: jsonEncode({
-        'name': _nameC.text.trim(),
-        'price': int.tryParse(_priceC.text.trim()) ?? 0,
-        'offer_price': int.tryParse(_offerPriceC.text.trim()) ?? 0,
-      }),
+      body: jsonEncode(payload),
     );
 
+    debugPrint('Update status: ${response.statusCode}');
+    debugPrint('Update body: ${response.body}');
+
     if (response.statusCode >= 200 && response.statusCode < 300) {
-      final body = jsonDecode(response.body);
-      debugPrint('Update product response: $body');
+      try {
+        final body = jsonDecode(response.body);
+        debugPrint('Update product response json: $body');
+      } catch (_) {}
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Produk berhasil diperbarui')),
       );
     } else {
-      throw Exception('Gagal update produk (${response.statusCode})');
+      String msg = 'Gagal update produk (${response.statusCode})';
+      try {
+        final body = jsonDecode(response.body);
+        if (body is Map && body['message'] != null) {
+          msg = body['message'].toString();
+        }
+      } catch (_) {}
+
+      debugPrint('Update product error: $msg');
+      throw Exception(msg);
     }
   }
 
