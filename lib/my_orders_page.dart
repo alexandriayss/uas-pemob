@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/order_model.dart';
+import '../models/product_model.dart';
 import 'order_detail_page.dart';
 
 class MyOrdersPage extends StatefulWidget {
@@ -21,6 +22,31 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
   void initState() {
     super.initState();
     _loadUserAndOrders();
+  }
+
+  final Map<int, Future<Product>> _productFutures = {};
+
+  Future<Product> _getProduct(int productId) {
+    _productFutures.putIfAbsent(productId, () async {
+      final url = Uri.parse('http://mortava.biz.id/api/products/$productId');
+      final response = await http.get(
+        url,
+        headers: {'Accept': 'application/json'},
+      );
+
+      if (response.statusCode == 200) {
+        final body = jsonDecode(response.body);
+        if (body is Map<String, dynamic>) {
+          return Product.fromJson(body);
+        } else {
+          throw Exception('Format produk tidak sesuai');
+        }
+      } else {
+        throw Exception('Gagal memuat produk ($productId)');
+      }
+    });
+
+    return _productFutures[productId]!;
   }
 
   Future<void> _loadUserAndOrders() async {
@@ -103,50 +129,7 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       elevation: 2,
-                      child: ListTile(
-                        contentPadding: const EdgeInsets.all(12),
-                        title: Text(
-                          "Order #${o.id}",
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const SizedBox(height: 6),
-                            Text("Total: Rp ${o.totalPrice}"),
-                            Text("Metode: ${o.paymentMethod.toUpperCase()}"),
-                            Text("Status: ${o.status}"),
-
-                            const SizedBox(height: 6),
-                            const Text(
-                              "Alamat Pengiriman:",
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-
-                            if (o.shippingStreet != null &&
-                                o.shippingStreet!.isNotEmpty)
-                              Text(o.shippingStreet!)
-                            else
-                              const Text('-'),
-
-                            Text(
-                              "${o.shippingCity ?? '-'}, ${o.shippingState ?? '-'}",
-                            ),
-                            Text(
-                              "${o.shippingPostalCode ?? '-'}, ${o.shippingCountry ?? '-'}",
-                            ),
-                            if (o.shippingPhone != null &&
-                                o.shippingPhone!.isNotEmpty)
-                              Text("Telp: ${o.shippingPhone}")
-                            else
-                              const Text("Telp: -"),
-                          ],
-                        ),
-
-                        trailing: const Icon(Icons.chevron_right),
+                      child: InkWell(
                         onTap: () {
                           Navigator.push(
                             context,
@@ -155,6 +138,148 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
                             ),
                           );
                         },
+                        child: Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // ==========================
+                              //   Info produk yang dibeli
+                              // ==========================
+                              FutureBuilder<Product>(
+                                future: _getProduct(
+                                  o.productId,
+                                ), // pastikan OrderModel punya field productId
+                                builder: (context, snap) {
+                                  if (snap.connectionState ==
+                                      ConnectionState.waiting) {
+                                    return const Text(
+                                      'Memuat info produk...',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontStyle: FontStyle.italic,
+                                      ),
+                                    );
+                                  }
+
+                                  if (snap.hasError || !snap.hasData) {
+                                    // fallback kalau gagal ambil produk
+                                    return Text(
+                                      'Produk #${o.productId}',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                      ),
+                                    );
+                                  }
+
+                                  final p = snap.data!;
+                                  return Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      // thumbnail
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: SizedBox(
+                                          width: 60,
+                                          height: 60,
+                                          child:
+                                              (p.image != null &&
+                                                  p.image!.isNotEmpty)
+                                              ? Image.network(
+                                                  p.image!,
+                                                  fit: BoxFit.cover,
+                                                  errorBuilder: (_, __, ___) =>
+                                                      const Icon(
+                                                        Icons
+                                                            .image_not_supported,
+                                                      ),
+                                                )
+                                              : const Icon(
+                                                  Icons.image,
+                                                  size: 32,
+                                                ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 10),
+                                      // nama + harga
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              p.name,
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 16,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            if (p.offerPrice != null)
+                                              Text('Rp ${p.offerPrice}')
+                                            else if (p.price != null)
+                                              Text('Rp ${p.price}'),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              ),
+
+                              const SizedBox(height: 12),
+
+                              // ==========================
+                              //   Info order (sebelumnya)
+                              // ==========================
+                              Text(
+                                "Order #${o.id}",
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              if (o.totalPrice != null)
+                                Text("Total: Rp ${o.totalPrice}"),
+                              Text("Metode: ${o.paymentMethod.toUpperCase()}"),
+                              Text("Status: ${o.status}"),
+
+                              const SizedBox(height: 6),
+                              const Text(
+                                "Alamat Pengiriman:",
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+
+                              if (o.shippingStreet != null &&
+                                  o.shippingStreet!.isNotEmpty)
+                                Text(o.shippingStreet!)
+                              else
+                                const Text('-'),
+
+                              Text(
+                                "${o.shippingCity ?? '-'}, ${o.shippingState ?? '-'}",
+                              ),
+                              Text(
+                                "${o.shippingPostalCode ?? '-'}, ${o.shippingCountry ?? '-'}",
+                              ),
+                              if (o.shippingPhone != null &&
+                                  o.shippingPhone!.isNotEmpty)
+                                Text("Telp: ${o.shippingPhone}")
+                              else
+                                const Text("Telp: -"),
+
+                              const Align(
+                                alignment: Alignment.centerRight,
+                                child: Icon(Icons.chevron_right),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     );
                   },
