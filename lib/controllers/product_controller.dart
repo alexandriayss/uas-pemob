@@ -27,13 +27,16 @@ class ProductController {
 
       // ❌ sedang diproses pembeli (tidak boleh diutak-atik seller)
       if (p.status == 'ordered' ||
-          p.status == 'processing' ||
+          p.status == 'procegit statusssing' ||
           p.status == 'shipped') {
         return false;
       }
 
       // ❌ hide lokal (delete manual)
-      if (ProductController.isProductHidden(p.id)) return false;
+      // 🔥 JANGAN hide produk yang sudah TERJUAL
+      if (ProductController.isProductHidden(p.id) && p.status != 'terjual') {
+        return false;
+      }
 
       // ✅ available + sold tampil
       return true;
