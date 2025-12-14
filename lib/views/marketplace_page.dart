@@ -59,12 +59,21 @@ class _MarketplacePageState extends State<MarketplacePage> {
             items: const [
               BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
               BottomNavigationBarItem(
-                  icon: Icon(Icons.receipt_long), label: 'My Orders'),
+                icon: Icon(Icons.receipt_long),
+                label: 'My Orders',
+              ),
               BottomNavigationBarItem(
-                  icon: Icon(Icons.inventory_2), label: 'My Products'),
+                icon: Icon(Icons.inventory_2),
+                label: 'My Products',
+              ),
               BottomNavigationBarItem(
-                  icon: Icon(Icons.sell), label: 'My Sales'),
-              BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+                icon: Icon(Icons.sell),
+                label: 'My Sales',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.person),
+                label: 'Profile',
+              ),
             ],
             onTap: (index) {
               setState(() => _currentIndex = index);
@@ -88,7 +97,9 @@ class _BerandaPage extends StatefulWidget {
 }
 
 class _BerandaPageState extends State<_BerandaPage> {
-  late Future<List<Product>> _futureProducts;
+  /// ❗ PERBAIKAN: TIDAK pakai `late`
+  Future<List<Product>>? _futureProducts;
+
   final ProductController _productController = ProductController();
 
   PriceRange _selectedPriceRange = PriceRange.all;
@@ -100,6 +111,8 @@ class _BerandaPageState extends State<_BerandaPage> {
   @override
   void initState() {
     super.initState();
+
+    // Inisialisasi pertama (AMAN)
     _futureProducts = _productController.fetchProductsFiltered(
       searchQuery: _searchQuery,
       priceRange: _selectedPriceRange,
@@ -112,11 +125,14 @@ class _BerandaPageState extends State<_BerandaPage> {
     super.dispose();
   }
 
+  /// ❗ PERBAIKAN UTAMA: reload HARUS pakai setState
   void _reloadProducts() {
-    _futureProducts = _productController.fetchProductsFiltered(
-      searchQuery: _searchQuery,
-      priceRange: _selectedPriceRange,
-    );
+    setState(() {
+      _futureProducts = _productController.fetchProductsFiltered(
+        searchQuery: _searchQuery,
+        priceRange: _selectedPriceRange,
+      );
+    });
   }
 
   @override
@@ -154,10 +170,7 @@ class _BerandaPageState extends State<_BerandaPage> {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(999),
                   gradient: const LinearGradient(
-                    colors: [
-                      Color(0xFFFFF176),
-                      Color(0xFFFFB74D),
-                    ],
+                    colors: [Color(0xFFFFF176), Color(0xFFFFB74D)],
                   ),
                 ),
               ),
@@ -166,15 +179,15 @@ class _BerandaPageState extends State<_BerandaPage> {
 
               // SEARCH BAR
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 4,
+                ),
                 child: TextField(
                   controller: _searchC,
                   onChanged: (v) {
-                    setState(() {
-                      _searchQuery = v.trim();
-                      _reloadProducts();
-                    });
+                    _searchQuery = v.trim();
+                    _reloadProducts();
                   },
                   style: GoogleFonts.poppins(fontSize: 13),
                   decoration: InputDecoration(
@@ -187,7 +200,9 @@ class _BerandaPageState extends State<_BerandaPage> {
                     fillColor: Colors.white,
                     prefixIcon: const Icon(Icons.search, size: 20),
                     contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 14),
+                      horizontal: 20,
+                      vertical: 14,
+                    ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(30),
                       borderSide: const BorderSide(
@@ -225,8 +240,10 @@ class _BerandaPageState extends State<_BerandaPage> {
               // GRID PRODUK
               Expanded(
                 child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 6,
+                  ),
                   child: Container(
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -241,17 +258,25 @@ class _BerandaPageState extends State<_BerandaPage> {
                       ],
                     ),
                     child: FutureBuilder<List<Product>>(
-                      future: _futureProducts,
+                      /// ❗ FALLBACK BIAR TIDAK PERNAH NULL
+                      future:
+                          _futureProducts ??
+                          _productController.fetchProductsFiltered(
+                            searchQuery: _searchQuery,
+                            priceRange: _selectedPriceRange,
+                          ),
                       builder: (context, snapshot) {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
                           return const Center(
-                              child: CircularProgressIndicator());
+                            child: CircularProgressIndicator(),
+                          );
                         }
 
                         if (snapshot.hasError) {
                           return Center(
-                              child: Text('Error: ${snapshot.error}'));
+                            child: Text('Error: ${snapshot.error}'),
+                          );
                         }
 
                         final products = snapshot.data ?? [];
@@ -269,16 +294,16 @@ class _BerandaPageState extends State<_BerandaPage> {
                           padding: const EdgeInsets.all(16),
                           gridDelegate:
                               const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            childAspectRatio: 0.72,
-                            crossAxisSpacing: 16,
-                            mainAxisSpacing: 16,
-                          ),
+                                crossAxisCount: 2,
+                                childAspectRatio: 0.72,
+                                crossAxisSpacing: 16,
+                                mainAxisSpacing: 16,
+                              ),
                           itemCount: products.length,
                           itemBuilder: (c, i) {
                             return InkWell(
-                              onTap: () {
-                                Navigator.push(
+                              onTap: () async {
+                                final result = await Navigator.push<bool>(
                                   context,
                                   MaterialPageRoute(
                                     builder: (_) => ProductDetailPage(
@@ -286,6 +311,12 @@ class _BerandaPageState extends State<_BerandaPage> {
                                     ),
                                   ),
                                 );
+
+                                if (result == true && mounted) {
+                                  setState(() {
+                                    _reloadProducts(); // 🔥 REFRESH MARKETPLACE
+                                  });
+                                }
                               },
                               child: _ProductCard(product: products[i]),
                             );
@@ -323,10 +354,8 @@ class _BerandaPageState extends State<_BerandaPage> {
       ),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       onSelected: (_) {
-        setState(() {
-          _selectedPriceRange = value;
-          _reloadProducts();
-        });
+        _selectedPriceRange = value;
+        _reloadProducts();
       },
     );
   }
@@ -344,7 +373,8 @@ class _ProductCard extends StatelessWidget {
   Widget build(BuildContext context) {
     String format(num? v) => v == null ? '-' : 'Rp $v';
 
-    final bool hasDiscount = product.offerPrice != null &&
+    final bool hasDiscount =
+        product.offerPrice != null &&
         product.price != null &&
         product.offerPrice! < product.price!;
 
@@ -360,10 +390,10 @@ class _ProductCard extends StatelessWidget {
                 children: [
                   // Gambar
                   ClipRRect(
-                    borderRadius:
-                        const BorderRadius.vertical(top: Radius.circular(18)),
-                    child: (product.image != null &&
-                            product.image!.isNotEmpty)
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(18),
+                    ),
+                    child: (product.image != null && product.image!.isNotEmpty)
                         ? Image.network(
                             product.image!,
                             fit: BoxFit.cover,
@@ -376,29 +406,36 @@ class _ProductCard extends StatelessWidget {
                               ),
                             ),
                             child: const Center(
-                              child: Icon(Icons.image,
-                                  color: Colors.white, size: 35),
+                              child: Icon(
+                                Icons.image,
+                                color: Colors.white,
+                                size: 35,
+                              ),
                             ),
                           ),
                   ),
 
-                  // BADGE kategori (di atas gambar)
-                  if (product.category != null &&
-                      product.category!.isNotEmpty)
+                  // BADGE kategori
+                  if (product.category != null && product.category!.isNotEmpty)
                     Positioned(
                       left: 8,
                       top: 8,
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4),
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.black.withOpacity(0.45),
                           borderRadius: BorderRadius.circular(999),
                         ),
                         child: Row(
                           children: [
-                            const Icon(Icons.label_rounded,
-                                size: 12, color: Colors.white),
+                            const Icon(
+                              Icons.label_rounded,
+                              size: 12,
+                              color: Colors.white,
+                            ),
                             const SizedBox(width: 3),
                             Text(
                               product.category!,
@@ -420,20 +457,22 @@ class _ProductCard extends StatelessWidget {
                       top: 8,
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4),
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: const BoxDecoration(
                           gradient: LinearGradient(
-                            colors: [
-                              Color(0xFFFF7043),
-                              Color(0xFFFFC107),
-                            ],
+                            colors: [Color(0xFFFF7043), Color(0xFFFFC107)],
                           ),
                           borderRadius: BorderRadius.all(Radius.circular(999)),
                         ),
                         child: Row(
                           children: [
-                            const Icon(Icons.local_fire_department_rounded,
-                                size: 14, color: Colors.white),
+                            const Icon(
+                              Icons.local_fire_department_rounded,
+                              size: 14,
+                              color: Colors.white,
+                            ),
                             const SizedBox(width: 3),
                             Text(
                               "SALE",
@@ -453,12 +492,10 @@ class _ProductCard extends StatelessWidget {
 
             // Info Produk
             Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Nama
                   Text(
                     product.name,
                     maxLines: 1,
@@ -469,10 +506,7 @@ class _ProductCard extends StatelessWidget {
                       color: MortavaColors.darkText,
                     ),
                   ),
-
                   const SizedBox(height: 4),
-
-                  // Harga
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -495,13 +529,14 @@ class _ProductCard extends StatelessWidget {
                         ),
                     ],
                   ),
-
                   const SizedBox(height: 4),
-
                   Row(
                     children: [
-                      Icon(Icons.shopping_bag_outlined,
-                          size: 13, color: Colors.grey[600]),
+                      Icon(
+                        Icons.shopping_bag_outlined,
+                        size: 13,
+                        color: Colors.grey[600],
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         "Tap to see details",

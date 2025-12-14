@@ -168,7 +168,7 @@ class _CreateEditProductPageState extends State<CreateEditProductPage> {
 
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Produk berhasil dibuat')));
+      ).showSnackBar(const SnackBar(content: Text('Product created successfully.')));
     } else {
       throw Exception('Gagal membuat produk (${response.statusCode})');
     }
@@ -232,7 +232,7 @@ class _CreateEditProductPageState extends State<CreateEditProductPage> {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Produk berhasil diperbarui')),
+        const SnackBar(content: Text('Product updated successfully.')),
       );
     } else {
       String msg = 'Gagal update produk (${response.statusCode})';

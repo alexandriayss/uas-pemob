@@ -27,6 +27,10 @@ class _LoginPageState extends State<LoginPage> {
   bool _isLoading = false;
   bool _obscurePassword = true;
 
+  // 🔥 TAMBAHAN
+  // Menyimpan pesan error agar tampil di dalam UI (tanpa Snackbar)
+  String? _errorMessage;
+
   // Fungsi login (logic tetap sama)
   Future<void> _login() async {
     final identifier = _identifierC.text.trim();
@@ -34,28 +38,26 @@ class _LoginPageState extends State<LoginPage> {
 
     setState(() {
       _isLoading = true;
+      _errorMessage = null; // reset error setiap login
     });
 
-    try {
-      await _authController.login(identifier, password);
-      if (!mounted) return;
+    // 🔥 PANGGIL CONTROLLER YANG SEKARANG RETURN STRING?
+    final error = await _authController.login(identifier, password);
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const MarketplacePage()),
-      );
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
-      );
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+    if (!mounted) return;
+
+    if (error != null) {
+      setState(() {
+        _errorMessage = error; // tampilkan error di UI
+        _isLoading = false;
+      });
+      return;
     }
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const MarketplacePage()),
+    );
   }
 
   @override
@@ -172,6 +174,39 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           style: GoogleFonts.poppins(fontSize: 14),
                         ),
+
+                        const SizedBox(height: 14),
+
+                        // 🔥 ERROR MESSAGE (SEPERTI REGISTER)
+                        if (_errorMessage != null)
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 10,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.red.withOpacity(0.08),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.error_outline,
+                                    color: Colors.red, size: 18),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    _errorMessage!,
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 12,
+                                      color: Colors.red,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
 
                         const SizedBox(height: 22),
 

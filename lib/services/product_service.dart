@@ -36,8 +36,7 @@ class ProductService {
   Future<List<Product>> getMyProducts(int userId) async {
     // endpoint PERSIS sama seperti di kode lamamu:
     // http://mortava.biz.id/api/products/user/$_userId
-    final http.Response response =
-        await _api.getRaw('/products/user/$userId');
+    final http.Response response = await _api.getRaw('/products/user/$userId');
 
     if (response.statusCode == 200) {
       final body = jsonDecode(response.body);
@@ -78,7 +77,7 @@ class ProductService {
   }
 
   // AMBIL 1 PRODUK BERDASARKAN ID (dipakai di MyOrders)
-   Future<Product> getProductById(int productId) async {
+  Future<Product> getProductById(int productId) async {
     final http.Response response = await _api.getRaw('/products/$productId');
 
     if (response.statusCode == 200) {
@@ -102,6 +101,36 @@ class ProductService {
       return Product.fromJson(map);
     } else {
       throw Exception('Gagal memuat detail produk (${response.statusCode})');
+    }
+  }
+
+  Future<void> updateProductStatus({
+    required int productId,
+    required String status,
+  }) async {
+    final url = Uri.parse('${ApiService.baseUrl}/products/$productId');
+
+    final response = await http.put(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: jsonEncode({'status': status}),
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 204) {
+      return;
+    } else {
+      throw Exception('Gagal update status produk (${response.statusCode})');
+    }
+  }
+
+  Future<void> softDeleteProduct(int productId) async {
+    final response = await _api.patchRaw('/products/$productId');
+
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw Exception('Failed to delete product');
     }
   }
 }

@@ -55,16 +55,35 @@ class _MySalesPageState extends State<MySalesPage> {
   }
 
   // Badge status order (Pending / Completed / Canceled dll.)
-  Widget _statusBadge(String status) {
-    Color bg = Colors.orange.shade100;
-    Color text = Colors.orange.shade800;
+  Widget _statusBadge(String s) {
+    final status = s.toLowerCase().trim();
 
-    if (status.toLowerCase() == "completed") {
-      bg = Colors.green.shade100;
-      text = Colors.green.shade800;
-    } else if (status.toLowerCase() == "canceled") {
-      bg = Colors.red.shade100;
-      text = Colors.red.shade800;
+    late Color bg, text;
+    late String label;
+
+    switch (status) {
+      case 'pending':
+        label = 'Pending';
+        bg = Colors.orange.shade100;
+        text = Colors.orange.shade800;
+        break;
+
+      case 'dikirim':
+        label = 'Shipped';
+        bg = Colors.blue.shade100;
+        text = Colors.blue.shade800;
+        break;
+
+      case 'success':
+        label = 'Completed';
+        bg = Colors.green.shade100;
+        text = Colors.green.shade800;
+        break;
+
+      default:
+        label = s;
+        bg = Colors.grey.shade200;
+        text = Colors.grey.shade600;
     }
 
     return Container(
@@ -74,7 +93,7 @@ class _MySalesPageState extends State<MySalesPage> {
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
-        status,
+        label,
         style: GoogleFonts.poppins(
           fontSize: 12,
           fontWeight: FontWeight.w600,
@@ -98,10 +117,7 @@ class _MySalesPageState extends State<MySalesPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Image.asset(
-                    'assets/images/logo.png',
-                    height: 26,
-                  ),
+                  Image.asset('assets/images/logo.png', height: 26),
                   const SizedBox(width: 8),
                   Text(
                     'My Sales',
@@ -120,10 +136,7 @@ class _MySalesPageState extends State<MySalesPage> {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(999),
                   gradient: const LinearGradient(
-                    colors: [
-                      Color(0xFFFF8A65),
-                      Color(0xFFFF7043),
-                    ],
+                    colors: [Color(0xFFFF8A65), Color(0xFFFF7043)],
                   ),
                 ),
               ),
@@ -138,7 +151,8 @@ class _MySalesPageState extends State<MySalesPage> {
                           if (snapshot.connectionState ==
                               ConnectionState.waiting) {
                             return const Center(
-                                child: CircularProgressIndicator());
+                              child: CircularProgressIndicator(),
+                            );
                           }
 
                           if (snapshot.hasError) {
@@ -182,15 +196,15 @@ class _MySalesPageState extends State<MySalesPage> {
                                   ),
                                   boxShadow: [
                                     BoxShadow(
-                                      color:
-                                          Colors.orange.withOpacity(0.12),
+                                      color: Colors.orange.withOpacity(0.12),
                                       blurRadius: 14,
                                       offset: const Offset(0, 6),
                                     ),
                                   ],
                                   border: Border.all(
-                                    color: const Color(0xFFFFD9B3)
-                                        .withOpacity(0.55),
+                                    color: const Color(
+                                      0xFFFFD9B3,
+                                    ).withOpacity(0.55),
                                     width: 1.2,
                                   ),
                                 ),
@@ -200,9 +214,8 @@ class _MySalesPageState extends State<MySalesPage> {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (_) => OrderDetailPage(
-                                          orderId: o.id,
-                                        ),
+                                        builder: (_) =>
+                                            OrderDetailPage(orderId: o.id),
                                       ),
                                     );
                                   },
@@ -215,20 +228,18 @@ class _MySalesPageState extends State<MySalesPage> {
                                         // Top row: Buyer + Status
                                         Row(
                                           mainAxisAlignment:
-                                              MainAxisAlignment
-                                                  .spaceBetween,
+                                              MainAxisAlignment.spaceBetween,
                                           children: [
                                             if (o.buyerUsername != null &&
-                                                o.buyerUsername!
-                                                    .isNotEmpty)
+                                                o.buyerUsername!.isNotEmpty)
                                               Text(
                                                 'Buyer: ${o.buyerUsername!}',
                                                 style: GoogleFonts.poppins(
                                                   fontSize: 13,
-                                                  fontWeight:
-                                                      FontWeight.w600,
-                                                  color:
-                                                      const Color(0xFF4A3424),
+                                                  fontWeight: FontWeight.w600,
+                                                  color: const Color(
+                                                    0xFF4A3424,
+                                                  ),
                                                 ),
                                               )
                                             else
@@ -236,10 +247,10 @@ class _MySalesPageState extends State<MySalesPage> {
                                                 'Buyer: -',
                                                 style: GoogleFonts.poppins(
                                                   fontSize: 13,
-                                                  fontWeight:
-                                                      FontWeight.w600,
-                                                  color:
-                                                      const Color(0xFF4A3424),
+                                                  fontWeight: FontWeight.w600,
+                                                  color: const Color(
+                                                    0xFF4A3424,
+                                                  ),
                                                 ),
                                               ),
                                             _statusBadge(o.status),
@@ -252,17 +263,16 @@ class _MySalesPageState extends State<MySalesPage> {
                                         FutureBuilder<Product>(
                                           future: _productController
                                               .getProductByIdCached(
-                                                  o.productId),
+                                                o.productId,
+                                              ),
                                           builder: (context, snap) {
                                             if (snap.connectionState ==
                                                 ConnectionState.waiting) {
                                               return Text(
                                                 'Loading product info...',
-                                                style:
-                                                    GoogleFonts.poppins(
+                                                style: GoogleFonts.poppins(
                                                   fontSize: 12,
-                                                  fontStyle:
-                                                      FontStyle.italic,
+                                                  fontStyle: FontStyle.italic,
                                                 ),
                                               );
                                             }
@@ -271,10 +281,8 @@ class _MySalesPageState extends State<MySalesPage> {
                                                 !snap.hasData) {
                                               return Text(
                                                 'Product #${o.productId}',
-                                                style:
-                                                    GoogleFonts.poppins(
-                                                  fontWeight:
-                                                      FontWeight.bold,
+                                                style: GoogleFonts.poppins(
+                                                  fontWeight: FontWeight.bold,
                                                   fontSize: 15,
                                                 ),
                                               );
@@ -283,31 +291,29 @@ class _MySalesPageState extends State<MySalesPage> {
                                             final p = snap.data!;
                                             return Row(
                                               crossAxisAlignment:
-                                                  CrossAxisAlignment
-                                                      .start,
+                                                  CrossAxisAlignment.start,
                                               children: [
                                                 ClipRRect(
                                                   borderRadius:
-                                                      BorderRadius.circular(
-                                                          12),
+                                                      BorderRadius.circular(12),
                                                   child: SizedBox(
                                                     width: 70,
                                                     height: 70,
-                                                    child: (p.image !=
-                                                                null &&
-                                                            p.image!
-                                                                .isNotEmpty)
+                                                    child:
+                                                        (p.image != null &&
+                                                            p.image!.isNotEmpty)
                                                         ? Image.network(
                                                             p.image!,
-                                                            fit: BoxFit
-                                                                .cover,
+                                                            fit: BoxFit.cover,
                                                             errorBuilder:
-                                                                (_, __,
-                                                                        ___) =>
-                                                                    const Icon(
-                                                              Icons
-                                                                  .image_not_supported,
-                                                            ),
+                                                                (
+                                                                  _,
+                                                                  __,
+                                                                  ___,
+                                                                ) => const Icon(
+                                                                  Icons
+                                                                      .image_not_supported,
+                                                                ),
                                                           )
                                                         : const Icon(
                                                             Icons.image,
@@ -325,41 +331,33 @@ class _MySalesPageState extends State<MySalesPage> {
                                                       Text(
                                                         p.name,
                                                         maxLines: 2,
-                                                        overflow:
-                                                            TextOverflow
-                                                                .ellipsis,
-                                                        style: GoogleFonts
-                                                            .poppins(
-                                                          fontSize: 15,
-                                                          fontWeight:
-                                                              FontWeight
-                                                                  .w600,
-                                                        ),
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                        style:
+                                                            GoogleFonts.poppins(
+                                                              fontSize: 15,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w600,
+                                                            ),
                                                       ),
-                                                      const SizedBox(
-                                                          height: 4),
-                                                      if (p.offerPrice !=
-                                                          null)
+                                                      const SizedBox(height: 4),
+                                                      if (p.offerPrice != null)
                                                         Text(
                                                           'Rp ${p.offerPrice}',
-                                                          style: GoogleFonts
-                                                              .poppins(
+                                                          style: GoogleFonts.poppins(
                                                             fontWeight:
-                                                                FontWeight
-                                                                    .bold,
+                                                                FontWeight.bold,
                                                             color: MortavaColors
                                                                 .primaryOrange,
                                                           ),
                                                         )
-                                                      else if (p.price !=
-                                                          null)
+                                                      else if (p.price != null)
                                                         Text(
                                                           'Rp ${p.price}',
-                                                          style: GoogleFonts
-                                                              .poppins(
+                                                          style: GoogleFonts.poppins(
                                                             fontWeight:
-                                                                FontWeight
-                                                                    .bold,
+                                                                FontWeight.bold,
                                                             color: MortavaColors
                                                                 .primaryOrange,
                                                           ),
@@ -402,6 +400,44 @@ class _MySalesPageState extends State<MySalesPage> {
                                             fontSize: 13,
                                           ),
                                         ),
+
+                                        const SizedBox(height: 6),
+
+                                        if (o.status.toLowerCase() == 'pending')
+                                          Align(
+                                            alignment: Alignment.centerRight,
+                                            child: ElevatedButton(
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: Colors.blue,
+                                              ),
+                                              onPressed: () async {
+                                                // Ambil sellerId dulu (async BOLEH di sini)
+                                                final prefs =
+                                                    await SharedPreferences.getInstance();
+                                                final sellerId =
+                                                    o.userJual ??
+                                                    prefs.getInt('user_id');
+
+                                                if (sellerId == null) return;
+
+                                                // Panggil backend
+                                                await _orderController
+                                                    .shipOrder(o.id);
+
+                                                // Baru update state (TANPA await)
+                                                setState(() {
+                                                  _futureSales =
+                                                      _orderController
+                                                          .fetchSalesForUser(
+                                                            sellerId,
+                                                          );
+                                                });
+                                              },
+                                              child: const Text(
+                                                'Order shipped',
+                                              ),
+                                            ),
+                                          ),
 
                                         const SizedBox(height: 6),
 

@@ -7,12 +7,7 @@ import '../services/product_service.dart';
 /// - zeroTo50k: 0 - 50.000
 /// - fiftyTo100k: 50.000 - 100.000
 /// - above100k: > 100.000
-enum PriceRange {
-  all,
-  zeroTo50k,
-  fiftyTo100k,
-  above100k,
-}
+enum PriceRange { all, zeroTo50k, fiftyTo100k, above100k }
 
 class ProductController {
   final ProductService _service = ProductService();
@@ -23,8 +18,26 @@ class ProductController {
   }
 
   // Produk milik user (My Products)
-  Future<List<Product>> fetchMyProducts(int userId) {
-    return _service.getMyProducts(userId);
+  Future<List<Product>> fetchMyProducts(int userId) async {
+    final all = await _service.getMyProducts(userId);
+
+    return all.where((p) {
+      // ❌ benar-benar dihapus
+      if (p.status == 'deleted') return false;
+
+      // ❌ sedang diproses pembeli (tidak boleh diutak-atik seller)
+      if (p.status == 'ordered' ||
+          p.status == 'processing' ||
+          p.status == 'shipped') {
+        return false;
+      }
+
+      // ❌ hide lokal (delete manual)
+      if (ProductController.isProductHidden(p.id)) return false;
+
+      // ✅ available + sold tampil
+      return true;
+    }).toList();
   }
 
   // Hapus produk milik user
@@ -63,10 +76,7 @@ class ProductController {
     final q = searchQuery.toLowerCase();
 
     num _getPrice(Product p) {
-      // offerPrice diutamakan, kalau tidak ada pakai price
-      final dynamic raw = p.offerPrice ?? p.price ?? 0;
-      if (raw is num) return raw;
-      return num.tryParse(raw.toString()) ?? 0;
+      return (p.offerPrice ?? p.price ?? 0);
     }
 
     return all.where((p) {
@@ -86,11 +96,40 @@ class ProductController {
         case PriceRange.above100k:
           priceMatch = price > 100000;
           break;
-        case PriceRange.all:            
+        case PriceRange.all:
           priceMatch = true;
           break;
       }
-      return nameMatch && priceMatch;
+
+      // 🔥 TAMBAHAN (INI SAJA)
+      // produk yang sudah dibeli / habis TIDAK muncul di marketplace
+      // produk dianggap tersedia kalau:
+      // - status = null / tersedia / available
+      // - quantity TIDAK DIPAKSA (karena API sering null)
+      final bool isAvailable =
+          p.status == null || p.status == 'tersedia' || p.status == 'available';
+
+      // produk yang di-hide secara lokal TIDAK muncul di marketplace
+      if (ProductController.isProductHidden(p.id)) return false;
+
+      return nameMatch && priceMatch && isAvailable;
     }).toList();
+  }
+
+  // // Soft delete product (ubah status jadi deleted)
+  // Future<void> softDeleteProduct(int productId) {
+  //   return _service.softDeleteProduct(productId);
+  // }
+
+  // ================= LOCAL SOFT DELETE (FRONTEND ONLY) =================
+  static final Set<int> _hiddenProductIds = {};
+
+  // dipanggil saat user "hapus" produk
+  static void hideProductLocally(int productId) {
+    _hiddenProductIds.add(productId);
+  }
+
+  static bool isProductHidden(int productId) {
+    return _hiddenProductIds.contains(productId);
   }
 }

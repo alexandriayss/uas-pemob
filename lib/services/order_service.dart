@@ -10,7 +10,7 @@ class OrderService {
 
   // Pesanan sebagai pembeli (My Orders)
   Future<List<OrderModel>> getOrdersForUser(int userId) async {
-    // sama seperti kode lama: pindahan dari _fetchOrders() 
+    // sama seperti kode lama: pindahan dari _fetchOrders()
     final http.Response response = await _api.getRaw('/orders/buy/$userId');
 
     if (response.statusCode == 200) {
@@ -104,12 +104,14 @@ class OrderService {
     };
 
     // sama seperti kode lama kamu: POST ke /orders dengan JSON
-    final http.Response response =
-        await _api.postRaw('/orders', jsonEncode(body));
+    final http.Response response = await _api.postRaw(
+      '/orders',
+      jsonEncode(body),
+    );
 
     final dynamic raw = jsonDecode(response.body);
 
-    String msg = 'Order berhasil dibuat.';
+    String msg = 'Order created successfully.';
     if (raw is Map && raw['message'] != null) {
       msg = raw['message'].toString();
     }
@@ -118,6 +120,24 @@ class OrderService {
       return msg;
     } else {
       throw Exception(msg);
+    }
+  }
+
+  // COMPLETE ORDER (buyer)
+  Future<void> completeOrder(int orderId) async {
+    final response = await _api.patchRaw('/orders/$orderId/complete');
+
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw Exception('Gagal menyelesaikan pesanan (${response.statusCode})');
+    }
+  }
+
+  // SHIP ORDER (seller, nanti dipakai di sales)
+  Future<void> shipOrder(int orderId) async {
+    final response = await _api.patchRaw('/orders/$orderId/ship');
+
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw Exception('Gagal mengirim pesanan (${response.statusCode})');
     }
   }
 }

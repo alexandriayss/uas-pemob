@@ -44,4 +44,12 @@ class OrderController {
       paymentMethod: paymentMethod,
     );
   }
+  
+  Future<void> completeOrder(int orderId) {
+    return _service.completeOrder(orderId);
+  }
+
+  Future<void> shipOrder(int orderId) {
+    return _service.shipOrder(orderId);
+  }
 }

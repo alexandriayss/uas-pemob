@@ -55,16 +55,35 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
   }
 
   // Badge Status
-  Widget _statusBadge(String status) {
-    Color bg = Colors.orange.shade100;
-    Color text = Colors.orange.shade800;
+  Widget _statusBadge(String s) {
+    final status = s.toLowerCase().trim();
 
-    if (status.toLowerCase() == "completed") {
-      bg = Colors.green.shade100;
-      text = Colors.green.shade800;
-    } else if (status.toLowerCase() == "canceled") {
-      bg = Colors.red.shade100;
-      text = Colors.red.shade800;
+    late Color bg, text;
+    late String label;
+
+    switch (status) {
+      case 'pending':
+        label = 'Pending';
+        bg = Colors.orange.shade100;
+        text = Colors.orange.shade800;
+        break;
+
+      case 'dikirim':
+        label = 'Shipped';
+        bg = Colors.blue.shade100;
+        text = Colors.blue.shade800;
+        break;
+
+      case 'success':
+        label = 'Completed';
+        bg = Colors.green.shade100;
+        text = Colors.green.shade800;
+        break;
+
+      default:
+        label = s;
+        bg = Colors.grey.shade200;
+        text = Colors.grey.shade600;
     }
 
     return Container(
@@ -74,7 +93,7 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
         borderRadius: BorderRadius.circular(50),
       ),
       child: Text(
-        status,
+        label,
         style: GoogleFonts.poppins(
           fontSize: 12,
           fontWeight: FontWeight.w600,
@@ -99,10 +118,7 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Image.asset(
-                    "assets/images/logo.png",
-                    height: 26,
-                  ),
+                  Image.asset("assets/images/logo.png", height: 26),
                   const SizedBox(width: 8),
                   Text(
                     "My Orders",
@@ -165,7 +181,9 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
 
                               // BORDER lembut
                               border: Border.all(
-                                color: const Color(0xFFFFD9B3).withOpacity(0.55),
+                                color: const Color(
+                                  0xFFFFD9B3,
+                                ).withOpacity(0.55),
                                 width: 1.2,
                               ),
 
@@ -173,10 +191,7 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
                               gradient: const LinearGradient(
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
-                                colors: [
-                                  Color(0xFFFFFFFF),
-                                  Color(0xFFFFF5EB),
-                                ],
+                                colors: [Color(0xFFFFFFFF), Color(0xFFFFF5EB)],
                               ),
                               boxShadow: [
                                 BoxShadow(
@@ -229,7 +244,8 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
                                         if (snap.connectionState ==
                                             ConnectionState.waiting) {
                                           return const Text(
-                                              "Loading product...");
+                                            "Loading product...",
+                                          );
                                         }
 
                                         if (!snap.hasData) {
@@ -250,10 +266,11 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
                                                 child: Image.network(
                                                   p.image ?? "",
                                                   fit: BoxFit.cover,
-                                                  errorBuilder:
-                                                      (_, __, ___) =>
-                                                          const Icon(Icons
-                                                              .image_not_supported),
+                                                  errorBuilder: (_, __, ___) =>
+                                                      const Icon(
+                                                        Icons
+                                                            .image_not_supported,
+                                                      ),
                                                 ),
                                               ),
                                             ),
@@ -267,8 +284,7 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
                                                 children: [
                                                   Text(
                                                     p.name,
-                                                    style:
-                                                        GoogleFonts.poppins(
+                                                    style: GoogleFonts.poppins(
                                                       fontSize: 15,
                                                       fontWeight:
                                                           FontWeight.w600,
@@ -277,8 +293,7 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
                                                   const SizedBox(height: 4),
                                                   Text(
                                                     "Rp ${p.offerPrice ?? p.price}",
-                                                    style:
-                                                        GoogleFonts.poppins(
+                                                    style: GoogleFonts.poppins(
                                                       fontSize: 14,
                                                       fontWeight:
                                                           FontWeight.bold,
@@ -310,13 +325,44 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
                                       Text(
                                         "Total: Rp ${o.totalPrice}",
                                         style: GoogleFonts.poppins(
-                                            fontSize: 13),
+                                          fontSize: 13,
+                                        ),
                                       ),
                                     Text(
                                       "Payment: ${o.paymentMethod.toUpperCase()}",
-                                      style: GoogleFonts.poppins(
-                                          fontSize: 13),
+                                      style: GoogleFonts.poppins(fontSize: 13),
                                     ),
+
+                                    const SizedBox(height: 10),
+
+                                    if (o.status.toLowerCase() == 'dikirim')
+                                      Align(
+                                        alignment: Alignment.centerRight,
+                                        child: ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.green,
+                                          ),
+                                          onPressed: () async {
+                                            final prefs =
+                                                await SharedPreferences.getInstance();
+                                            final userId = prefs.getInt(
+                                              'user_id',
+                                            );
+
+                                            if (userId == null) return;
+
+                                            await _orderController
+                                                .completeOrder(o.id);
+
+                                            setState(() {
+                                              _futureOrders = _orderController
+                                                  .fetchOrdersForUser(userId);
+                                            });
+                                          },
+
+                                          child: const Text('Order completed'),
+                                        ),
+                                      ),
 
                                     const SizedBox(height: 10),
 
@@ -330,11 +376,12 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
 
                                     Text(o.shippingStreet ?? "-"),
                                     Text(
-                                        "${o.shippingCity}, ${o.shippingState}"),
+                                      "${o.shippingCity}, ${o.shippingState}",
+                                    ),
                                     Text(
-                                        "${o.shippingPostalCode}, ${o.shippingCountry}"),
-                                    Text(
-                                        "Phone: ${o.shippingPhone ?? '-'}"),
+                                      "${o.shippingPostalCode}, ${o.shippingCountry}",
+                                    ),
+                                    Text("Phone: ${o.shippingPhone ?? '-'}"),
 
                                     const SizedBox(height: 10),
 
@@ -344,7 +391,7 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
                                         Icons.chevron_right,
                                         color: Colors.grey.shade700,
                                       ),
-                                    )
+                                    ),
                                   ],
                                 ),
                               ),

@@ -25,7 +25,10 @@ class MyProductsPage extends StatefulWidget {
 
 class _MyProductsPageState extends State<MyProductsPage> {
   Future<List<Product>>? _futureMyProducts;
+  List<Product> _products = []; // ← TAMBAHAN
   int? _userId;
+
+  int _pendingOrderCount = 0; // 🔥 TAMBAHAN INI
 
   final ProductController _productController = ProductController();
 
@@ -90,22 +93,40 @@ class _MyProductsPageState extends State<MyProductsPage> {
   }
 
   Future<void> _deleteProduct(Product p) async {
+    // 🔥 CEK DULU: SUDAH ADA YANG PESAN?
+    if (p.status == 'sold' || p.status == 'terjual') {
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text('Cannot Remove Product'),
+          content: const Text(
+            'This product already has an order.\n'
+            'You cannot remove a product that has been purchased.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
     final confirm = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Hapus Produk'),
-        content: Text('Yakin ingin menghapus "${p.name}"?'),
+        title: const Text('Remove Product'),
+        content: Text('Are you sure you want to remove "${p.name}"?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Batal'),
+            child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text(
-              'Hapus',
-              style: TextStyle(color: Colors.red),
-            ),
+            child: const Text('Remove', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -113,22 +134,16 @@ class _MyProductsPageState extends State<MyProductsPage> {
 
     if (confirm != true) return;
 
-    try {
-      await _productController.deleteMyProduct(p.id);
+    // 🔥 HIDE PRODUK SECARA LOKAL
+    ProductController.hideProductLocally(p.id);
 
-      if (!mounted) return;
+    setState(() {
+      _products.removeWhere((item) => item.id == p.id);
+    });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Produk "${p.name}" berhasil dihapus')),
-      );
-      _refresh();
-    } catch (e) {
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error hapus produk: $e')),
-      );
-    }
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('"${p.name}" removed')));
   }
 
   // ===== helper untuk badge status (ID -> EN) =====
@@ -157,21 +172,12 @@ class _MyProductsPageState extends State<MyProductsPage> {
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 8,
-        vertical: 2,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(50),
       ),
-      child: Text(
-        label,
-        style: GoogleFonts.poppins(
-          fontSize: 11,
-          color: fg,
-        ),
-      ),
+      child: Text(label, style: GoogleFonts.poppins(fontSize: 11, color: fg)),
     );
   }
 
@@ -190,10 +196,7 @@ class _MyProductsPageState extends State<MyProductsPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Image.asset(
-                    'assets/images/logo.png',
-                    height: 26,
-                  ),
+                  Image.asset('assets/images/logo.png', height: 26),
                   const SizedBox(width: 8),
                   Text(
                     'My Products',
@@ -212,14 +215,43 @@ class _MyProductsPageState extends State<MyProductsPage> {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(999),
                   gradient: const LinearGradient(
-                    colors: [
-                      Color(0xFFFF8A65),
-                      Color(0xFFFF7043),
-                    ],
+                    colors: [Color(0xFFFF8A65), Color(0xFFFF7043)],
                   ),
                 ),
               ),
               const SizedBox(height: 12),
+
+              // 🔥 BANNER INFO PESANAN (SELALU DI ATAS)
+              if (_pendingOrderCount > 0)
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.orange.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: Colors.orange),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.info_outline, color: Colors.orange),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'You have $_pendingOrderCount orders that are still being processed',
+                            style: GoogleFonts.poppins(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
 
               Expanded(
                 child: (_futureMyProducts == null)
@@ -230,7 +262,8 @@ class _MyProductsPageState extends State<MyProductsPage> {
                           if (snapshot.connectionState ==
                               ConnectionState.waiting) {
                             return const Center(
-                                child: CircularProgressIndicator());
+                              child: CircularProgressIndicator(),
+                            );
                           }
 
                           if (snapshot.hasError) {
@@ -242,7 +275,38 @@ class _MyProductsPageState extends State<MyProductsPage> {
                             );
                           }
 
-                          final products = snapshot.data ?? [];
+                          final allProducts = snapshot.data ?? [];
+
+                          // 🔥 HITUNG PENDING ORDER
+                          final int pending = allProducts
+                              .where(
+                                (p) =>
+                                    p.status == 'ordered' ||
+                                    p.status == 'processing' ||
+                                    p.status == 'shipped',
+                              )
+                              .length;
+
+                          // 🔥 UPDATE STATE TANPA LOOP
+                          if (_pendingOrderCount != pending) {
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              if (mounted) {
+                                setState(() {
+                                  _pendingOrderCount = pending;
+                                });
+                              }
+                            });
+                          }
+
+                          // 🔥 PRODUK YANG BOLEH TAMPIL DI MY PRODUCTS
+                          final List<Product> products = allProducts
+                              .where(
+                                (p) =>
+                                    p.status != 'ordered' &&
+                                    p.status != 'processing' &&
+                                    p.status != 'shipped',
+                              )
+                              .toList();
 
                           if (products.isEmpty) {
                             return Center(
@@ -282,8 +346,9 @@ class _MyProductsPageState extends State<MyProductsPage> {
                                       ),
                                     ],
                                     border: Border.all(
-                                      color: const Color(0xFFFFD9B3)
-                                          .withOpacity(0.6),
+                                      color: const Color(
+                                        0xFFFFD9B3,
+                                      ).withOpacity(0.6),
                                       width: 1.0,
                                     ),
                                   ),
@@ -303,9 +368,8 @@ class _MyProductsPageState extends State<MyProductsPage> {
                                               ? Image.network(
                                                   p.image!,
                                                   fit: BoxFit.cover,
-                                                  errorBuilder:
-                                                      (_, __, ___) =>
-                                                          const Icon(
+                                                  errorBuilder: (_, __, ___) =>
+                                                      const Icon(
                                                     Icons.image_not_supported,
                                                   ),
                                                 )
@@ -355,10 +419,10 @@ class _MyProductsPageState extends State<MyProductsPage> {
                                                 if (p.category != null)
                                                   Text(
                                                     p.category!,
-                                                    style:
-                                                        GoogleFonts.poppins(
+                                                    style: GoogleFonts.poppins(
                                                       fontSize: 11,
-                                                      color: Colors.grey[600],
+                                                      color:
+                                                          Colors.grey[600],
                                                     ),
                                                   ),
                                                 const SizedBox(height: 4),

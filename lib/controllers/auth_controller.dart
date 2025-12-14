@@ -4,14 +4,21 @@ import '../services/auth_service.dart';
 class AuthController {
   final AuthService _service = AuthService();
 
-  Future<void> login(String identifier, String password) async {
+  /// return null = sukses
+  /// return String = pesan error
+  Future<String?> login(String identifier, String password) async {
     if (identifier.isEmpty || password.isEmpty) {
-      throw Exception('Identifier dan password wajib diisi');
+      return 'Email and password are required';
     }
 
-    await _service.login(
-      identifier: identifier,
-      password: password,
-    );
+    try {
+      await _service.login(
+        identifier: identifier,
+        password: password,
+      );
+      return null;
+    } catch (e) {
+      return e.toString().replaceFirst('Exception: ', '');
+    }
   }
 }

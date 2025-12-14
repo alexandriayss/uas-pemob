@@ -9,7 +9,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../models/product_model.dart';
+import '../models/user_model.dart'; // 🔥 TAMBAHAN
 import '../controllers/product_controller.dart';
+import '../controllers/user_controller.dart'; // 🔥 TAMBAHAN
 import '../theme/mortava_theme.dart';
 import 'order_create_page.dart';
 
@@ -26,10 +28,21 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   late Future<Product> _futureProduct;
   final ProductController _productController = ProductController();
 
+  // 🔥 TAMBAHAN
+  final UserController _userController = UserController();
+  UserModel? _currentUser;
+
   @override
   void initState() {
     super.initState();
     _futureProduct = _productController.getProductDetail(widget.productId);
+    _loadUser(); // 🔥 TAMBAHAN
+  }
+
+  Future<void> _loadUser() async {
+    final user = await _userController.getCurrentUser();
+    if (!mounted) return;
+    setState(() => _currentUser = user);
   }
 
   String _formatPrice(num? value) {
@@ -74,8 +87,19 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
               }
 
               final p = snapshot.data!;
-              final int qty = p.quantity ?? 0;
-              final bool inStock = qty > 0;
+
+              // 🔥 TAMBAHAN
+              // cek apakah produk milik user sendiri
+              final bool isOwner =
+                  _currentUser != null && p.userId == _currentUser!.id;
+
+              // stok sesuai logic kamu
+              // produk dianggap habis HANYA jika benar-benar sold / terjual
+              final bool inStock =
+                  (p.quantity == null || p.quantity! > 0) &&
+                  (p.status == null ||
+                      p.status == 'tersedia' ||
+                      p.status == 'available');
 
               final bool hasDiscount =
                   p.offerPrice != null &&
@@ -120,10 +144,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(999),
                           gradient: const LinearGradient(
-                            colors: [
-                              Color(0xFFFF8A65),
-                              Color(0xFFFF7043),
-                            ],
+                            colors: [Color(0xFFFF8A65), Color(0xFFFF7043)],
                           ),
                         ),
                       ),
@@ -137,10 +158,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                         gradient: const LinearGradient(
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
-                          colors: [
-                            Color(0xFFFFFBF2), // hampir putih
-                            Color(0xFFFFE8C8), // peach lembut
-                          ],
+                          colors: [Color(0xFFFFFBF2), Color(0xFFFFE8C8)],
                         ),
                         borderRadius: BorderRadius.circular(24),
                         boxShadow: [
@@ -154,7 +172,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // ------------ IMAGE (no crop) ------------
+                          // ------------ IMAGE ------------
                           ClipRRect(
                             borderRadius: BorderRadius.circular(22),
                             child: AspectRatio(
@@ -164,8 +182,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                 child: p.image != null && p.image!.isNotEmpty
                                     ? Image.network(
                                         p.image!,
-                                        fit: BoxFit
-                                            .contain, // supaya gambar tidak kepotong
+                                        fit: BoxFit.contain,
                                       )
                                     : const Center(
                                         child: Icon(
@@ -202,13 +219,13 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                       style: GoogleFonts.poppins(
                                         fontSize: 12,
                                         color: Colors.grey,
-                                        decoration:
-                                            TextDecoration.lineThrough,
+                                        decoration: TextDecoration.lineThrough,
                                       ),
                                     ),
                                   Text(
                                     _formatPrice(
-                                        hasDiscount ? p.offerPrice : p.price),
+                                      hasDiscount ? p.offerPrice : p.price,
+                                    ),
                                     style: GoogleFonts.poppins(
                                       fontSize: 14,
                                       fontWeight: FontWeight.w700,
@@ -220,10 +237,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                             ],
                           ),
                           const SizedBox(height: 10),
-                          Container(
-                            height: 1,
-                            color: Colors.grey.shade500,
-                          ),
+                          Container(height: 1, color: Colors.grey.shade500),
                           const SizedBox(height: 18),
 
                           // ------------ DESCRIPTION ------------
@@ -236,10 +250,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                             ),
                           ),
                           const SizedBox(height: 6),
-                          Container(
-                            height: 1,
-                            color: Colors.grey.shade400,
-                          ),
+                          Container(height: 1, color: Colors.grey.shade400),
                           const SizedBox(height: 10),
                           Text(
                             p.description?.isNotEmpty == true
@@ -263,32 +274,41 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                             ),
                           ),
                           const SizedBox(height: 6),
-                          Container(
-                            height: 1,
-                            color: Colors.grey.shade400,
-                          ),
+                          Container(height: 1, color: Colors.grey.shade400),
                           const SizedBox(height: 10),
 
                           Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 6),
+                              horizontal: 16,
+                              vertical: 6,
+                            ),
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(30),
-                              color: inStock
+                              color: isOwner
+                                  ? Colors.grey.shade300
+                                  : inStock
                                   ? const Color(0xFFE8F5E9)
                                   : const Color(0xFFFFEBEE),
                               border: Border.all(
-                                color: inStock
+                                color: isOwner
+                                    ? Colors.grey
+                                    : inStock
                                     ? const Color(0xFF43A047)
                                     : const Color(0xFFE53935),
                               ),
                             ),
                             child: Text(
-                              inStock ? 'READY' : 'OUT OF STOCK',
+                              isOwner
+                                  ? 'THIS IS YOUR PRODUCT'
+                                  : inStock
+                                  ? 'READY'
+                                  : 'OUT OF STOCK',
                               style: GoogleFonts.poppins(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
-                                color: inStock
+                                color: isOwner
+                                    ? Colors.black54
+                                    : inStock
                                     ? const Color(0xFF2E7D32)
                                     : const Color(0xFFC62828),
                               ),
@@ -304,25 +324,21 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
-                        onPressed: inStock
+                        onPressed: (inStock && !isOwner)
                             ? () async {
                                 final result = await Navigator.push<bool>(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (_) =>
-                                        OrderCreatePage(product: p),
+                                    builder: (_) => OrderCreatePage(product: p),
                                   ),
                                 );
 
                                 if (result == true && mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        'Order created successfully.',
-                                        style: GoogleFonts.poppins(),
-                                      ),
-                                    ),
-                                  );
+                                  // 🔥 INI YANG KURANG DARI AWAL
+                                  // ProductController.hideProductLocally(p.id);
+
+                                  // 🔥 KASIH SINYAL KE MARKETPLACE
+                                  Navigator.pop(context, true);
                                 }
                               }
                             : null,
@@ -334,18 +350,19 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                         ),
                         child: Ink(
                           decoration: BoxDecoration(
-                            // Pakai gradient utama MortavaTheme kalau stok READY
-                            gradient: inStock
+                            gradient: (inStock && !isOwner)
                                 ? MortavaGradients.primaryButton
                                 : null,
-                            color: inStock ? null : Colors.grey,
+                            color: (inStock && !isOwner) ? null : Colors.grey,
                             borderRadius: BorderRadius.circular(30),
                           ),
                           child: Container(
                             height: 52,
                             alignment: Alignment.center,
                             child: Text(
-                              'BUY NOW',
+                              isOwner
+                                  ? 'YOU CANNOT BUY YOUR OWN PRODUCT'
+                                  : 'BUY NOW',
                               style: GoogleFonts.poppins(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w700,

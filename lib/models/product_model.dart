@@ -48,4 +48,16 @@ class Product {
       status: json['status'],
     );
   }
+
+    // ===================== TAMBAHAN AMAN =====================
+  // Status PRODUK (bukan status order)
+  bool get isAvailable =>
+      status == null ||
+      status == 'tersedia' ||
+      status == 'available';
+
+  bool get isSold =>
+      status == 'terjual' ||
+      status == 'sold';
+
 }
