@@ -41,7 +41,7 @@ class _LoginPageState extends State<LoginPage> {
       _errorMessage = null; // reset error setiap login
     });
 
-    // 🔥 PANGGIL CONTROLLER YANG SEKARANG RETURN STRING?
+    // 🔥 LOGIN SEKARANG TIDAK THROW EXCEPTION
     final error = await _authController.login(identifier, password);
 
     if (!mounted) return;
@@ -76,15 +76,16 @@ class _LoginPageState extends State<LoginPage> {
         child: SafeArea(
           child: Center(
             child: SingleChildScrollView(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   // CARD LOGIN UTAMA
                   Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 24, vertical: 32),
+                      horizontal: 24,
+                      vertical: 32,
+                    ),
                     decoration: MortavaDecorations.authCardBox(),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
@@ -128,12 +129,19 @@ class _LoginPageState extends State<LoginPage> {
                         const SizedBox(height: 6),
 
                         // Input Email
+                        // Input Email
                         TextField(
                           controller: _identifierC,
+
+                          // 🔥 TAMBAHAN INI (WAJIB)
+                          keyboardType: TextInputType.emailAddress,
+
                           decoration: MortavaInputs.roundedInput(
                             hint: 'you@example.com',
-                            prefixIcon:
-                                const Icon(Icons.email_outlined, size: 20),
+                            prefixIcon: const Icon(
+                              Icons.email_outlined,
+                              size: 20,
+                            ),
                           ),
                           style: GoogleFonts.poppins(fontSize: 14),
                         ),
@@ -156,8 +164,10 @@ class _LoginPageState extends State<LoginPage> {
                           obscureText: _obscurePassword,
                           decoration: MortavaInputs.roundedInput(
                             hint: 'Enter your password',
-                            prefixIcon:
-                                const Icon(Icons.lock_outline, size: 20),
+                            prefixIcon: const Icon(
+                              Icons.lock_outline,
+                              size: 20,
+                            ),
                             suffixIcon: IconButton(
                               onPressed: () {
                                 setState(() {
@@ -191,8 +201,11 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                             child: Row(
                               children: [
-                                const Icon(Icons.error_outline,
-                                    color: Colors.red, size: 18),
+                                const Icon(
+                                  Icons.error_outline,
+                                  color: Colors.red,
+                                  size: 18,
+                                ),
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: Text(
@@ -210,7 +223,7 @@ class _LoginPageState extends State<LoginPage> {
 
                         const SizedBox(height: 22),
 
-                        // Tombol SIGN IN dengan gradient premium
+                        // Tombol SIGN IN
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
@@ -266,7 +279,8 @@ class _LoginPageState extends State<LoginPage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (_) => const RegisterPage()),
+                              builder: (_) => const RegisterPage(),
+                            ),
                           );
                         },
                         child: Text(
