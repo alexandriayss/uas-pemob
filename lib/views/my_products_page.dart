@@ -11,7 +11,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/product_model.dart';
+import '../models/order_model.dart'; // 🔥 TAMBAHAN
 import '../controllers/product_controller.dart';
+import '../controllers/order_controller.dart'; // 🔥 TAMBAHAN
 import '../theme/mortava_theme.dart';
 import 'product_detail_page.dart';
 import 'product_form_page.dart';
@@ -25,12 +27,14 @@ class MyProductsPage extends StatefulWidget {
 
 class _MyProductsPageState extends State<MyProductsPage> {
   Future<List<Product>>? _futureMyProducts;
+  Future<List<OrderModel>>? _futureSales; // 🔥 TAMBAHAN (MY SALES)
   List<Product> _products = []; // ← TAMBAHAN
   int? _userId;
 
   int _pendingOrderCount = 0; // 🔥 TAMBAHAN INI
 
   final ProductController _productController = ProductController();
+  final OrderController _orderController = OrderController(); // 🔥 TAMBAHAN
 
   @override
   void initState() {
@@ -51,6 +55,9 @@ class _MyProductsPageState extends State<MyProductsPage> {
       _userId = userId;
       if (userId != null) {
         _futureMyProducts = _productController.fetchMyProducts(userId);
+
+        // 🔥 AMBIL DATA MY SALES (UNTUK BANNER)
+        _futureSales = _orderController.fetchSalesForUser(userId);
       } else {
         _futureMyProducts = Future.error(
           Exception('User belum login / user_id tidak ditemukan'),
@@ -63,6 +70,7 @@ class _MyProductsPageState extends State<MyProductsPage> {
     if (_userId == null) return;
     setState(() {
       _futureMyProducts = _productController.fetchMyProducts(_userId!);
+      _futureSales = _orderController.fetchSalesForUser(_userId!); // 🔥 REFRESH SALES
     });
   }
 
@@ -221,6 +229,36 @@ class _MyProductsPageState extends State<MyProductsPage> {
               ),
               const SizedBox(height: 12),
 
+              // 🔥 HITUNG PENDING ORDER DARI MY SALES (BENAR)
+              FutureBuilder<List<OrderModel>>(
+                future: _futureSales,
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) return const SizedBox.shrink();
+
+                  final int pending = snapshot.data!
+                      .where(
+                        (o) =>
+                            o.status.toLowerCase() == 'pending' ||
+                            o.status.toLowerCase() == 'processing' ||
+                            o.status.toLowerCase() == 'dikirim' ||
+                            o.status.toLowerCase() == 'shipped',
+                      )
+                      .length;
+
+                  if (_pendingOrderCount != pending) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (mounted) {
+                        setState(() {
+                          _pendingOrderCount = pending;
+                        });
+                      }
+                    });
+                  }
+
+                  return const SizedBox.shrink();
+                },
+              ),
+
               // 🔥 BANNER INFO PESANAN (SELALU DI ATAS)
               if (_pendingOrderCount > 0)
                 Padding(
@@ -253,6 +291,7 @@ class _MyProductsPageState extends State<MyProductsPage> {
                   ),
                 ),
 
+              // ================= LIST PRODUK =================
               Expanded(
                 child: (_futureMyProducts == null)
                     ? const Center(child: CircularProgressIndicator())
@@ -276,27 +315,6 @@ class _MyProductsPageState extends State<MyProductsPage> {
                           }
 
                           final allProducts = snapshot.data ?? [];
-
-                          // 🔥 HITUNG PENDING ORDER
-                          final int pending = allProducts
-                              .where(
-                                (p) =>
-                                    p.status == 'ordered' ||
-                                    p.status == 'processing' ||
-                                    p.status == 'shipped',
-                              )
-                              .length;
-
-                          // 🔥 UPDATE STATE TANPA LOOP
-                          if (_pendingOrderCount != pending) {
-                            WidgetsBinding.instance.addPostFrameCallback((_) {
-                              if (mounted) {
-                                setState(() {
-                                  _pendingOrderCount = pending;
-                                });
-                              }
-                            });
-                          }
 
                           // 🔥 PRODUK YANG BOLEH TAMPIL DI MY PRODUCTS
                           final List<Product> products = allProducts
@@ -368,8 +386,9 @@ class _MyProductsPageState extends State<MyProductsPage> {
                                               ? Image.network(
                                                   p.image!,
                                                   fit: BoxFit.cover,
-                                                  errorBuilder: (_, __, ___) =>
-                                                      const Icon(
+                                                  errorBuilder:
+                                                      (_, __, ___) =>
+                                                          const Icon(
                                                     Icons.image_not_supported,
                                                   ),
                                                 )

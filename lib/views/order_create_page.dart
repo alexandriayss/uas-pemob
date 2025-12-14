@@ -13,6 +13,7 @@ import '../models/product_model.dart';
 import '../models/user_model.dart';
 import '../controllers/order_controller.dart';
 import '../controllers/user_controller.dart';
+import '../controllers/product_controller.dart'; 
 import '../theme/mortava_theme.dart';
 
 class OrderCreatePage extends StatefulWidget {
@@ -32,8 +33,9 @@ class _OrderCreatePageState extends State<OrderCreatePage> {
   final TextEditingController _cityC = TextEditingController();
   final TextEditingController _stateC = TextEditingController();
   final TextEditingController _postalC = TextEditingController();
-  final TextEditingController _countryC =
-      TextEditingController(text: 'Indonesia');
+  final TextEditingController _countryC = TextEditingController(
+    text: 'Indonesia',
+  );
 
   String _paymentMethod = 'cod';
   bool _isSubmitting = false;
@@ -73,9 +75,9 @@ class _OrderCreatePageState extends State<OrderCreatePage> {
     if (!_formKey.currentState!.validate()) return;
 
     if (_currentUser == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('User is not logged in')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('User is not logged in')));
       return;
     }
 
@@ -98,15 +100,18 @@ class _OrderCreatePageState extends State<OrderCreatePage> {
 
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(msg)),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+
+      // 🔥 PENTING: sembunyikan produk dari marketplace (frontend only)
+      ProductController.hideProductLocally(widget.product.id);
+
+      // 🔥 kirim sinyal ke halaman sebelumnya (Marketplace)
       Navigator.pop(context, true);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
     } finally {
       if (mounted) {
         setState(() {
@@ -123,8 +128,7 @@ class _OrderCreatePageState extends State<OrderCreatePage> {
       labelStyle: GoogleFonts.poppins(fontSize: 13),
       filled: true,
       fillColor: Colors.white,
-      contentPadding:
-          const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(borderRadius),
       ),
@@ -186,10 +190,7 @@ class _OrderCreatePageState extends State<OrderCreatePage> {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(999),
                       gradient: const LinearGradient(
-                        colors: [
-                          Color(0xFFFF8A65),
-                          Color(0xFFFF7043),
-                        ],
+                        colors: [Color(0xFFFF8A65), Color(0xFFFF7043)],
                       ),
                     ),
                   ),
@@ -198,17 +199,16 @@ class _OrderCreatePageState extends State<OrderCreatePage> {
 
                 // ================= CARD RINGKASAN PRODUK =================
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(22),
                     gradient: const LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
-                      colors: [
-                        Color(0xFFFFFFFF),
-                        Color(0xFFFFF5EB),
-                      ],
+                      colors: [Color(0xFFFFFFFF), Color(0xFFFFF5EB)],
                     ),
                     boxShadow: [
                       BoxShadow(
@@ -290,8 +290,9 @@ class _OrderCreatePageState extends State<OrderCreatePage> {
                       const SizedBox(height: 10),
                       TextFormField(
                         controller: _streetC,
-                        decoration:
-                            _fieldDecoration('Street / detailed address'),
+                        decoration: _fieldDecoration(
+                          'Street / detailed address',
+                        ),
                         validator: (v) => v == null || v.trim().isEmpty
                             ? 'This field is required'
                             : null,
@@ -349,10 +350,7 @@ class _OrderCreatePageState extends State<OrderCreatePage> {
                             value: 'cod',
                             child: Text('Cash on Delivery (COD)'),
                           ),
-                          DropdownMenuItem(
-                            value: 'qris',
-                            child: Text('QRIS'),
-                          ),
+                          DropdownMenuItem(value: 'qris', child: Text('QRIS')),
                           DropdownMenuItem(
                             value: 'paylater',
                             child: Text('Paylater'),
@@ -383,10 +381,7 @@ class _OrderCreatePageState extends State<OrderCreatePage> {
                           child: Ink(
                             decoration: BoxDecoration(
                               gradient: const LinearGradient(
-                                colors: [
-                                  Color(0xFFFFF59D),
-                                  Color(0xFFFFEB3B),
-                                ],
+                                colors: [Color(0xFFFFF59D), Color(0xFFFFEB3B)],
                               ),
                               borderRadius: BorderRadius.circular(30),
                             ),
