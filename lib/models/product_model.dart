@@ -1,7 +1,6 @@
-// lib/models/product_model.dart
 class Product {
   final int id;
-  final int? userId; // <- baru
+  final int? userId; 
   final String name;
   final String? category;
   final String? description;
@@ -9,7 +8,7 @@ class Product {
   final int? offerPrice;
   final int? quantity;
   final String? image;
-  final String? status; // <- baru
+  final String? status; 
 
   Product({
     required this.id,
@@ -49,8 +48,7 @@ class Product {
     );
   }
 
-    // ===================== TAMBAHAN AMAN =====================
-  // Status PRODUK (bukan status order)
+  // Status produk
   bool get isAvailable =>
       status == null ||
       status == 'tersedia' ||

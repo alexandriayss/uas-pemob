@@ -1,19 +1,11 @@
-// lib/views/my_products_page.dart
-//
-// My Products Page dengan tema Mortava Shop + MortavaTheme:
-// - Background gradient cream–peach (MortavaDecorations.marketplaceBackgroundBox())
-// - Header custom (logo + "My Products")
-// - Card produk lebih rapi, pakai Poppins, harga pakai MortavaColors.primaryOrange
-// - Tombol tambah produk via FloatingActionButton warna primaryOrange
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/product_model.dart';
-import '../models/order_model.dart'; // 🔥 TAMBAHAN
+import '../models/order_model.dart'; 
 import '../controllers/product_controller.dart';
-import '../controllers/order_controller.dart'; // 🔥 TAMBAHAN
+import '../controllers/order_controller.dart'; 
 import '../theme/mortava_theme.dart';
 import 'product_detail_page.dart';
 import 'product_form_page.dart';
@@ -27,14 +19,14 @@ class MyProductsPage extends StatefulWidget {
 
 class _MyProductsPageState extends State<MyProductsPage> {
   Future<List<Product>>? _futureMyProducts;
-  Future<List<OrderModel>>? _futureSales; // 🔥 TAMBAHAN (MY SALES)
-  List<Product> _products = []; // ← TAMBAHAN
+  Future<List<OrderModel>>? _futureSales; 
+  List<Product> _products = []; 
   int? _userId;
 
-  int _pendingOrderCount = 0; // 🔥 TAMBAHAN INI
+  int _pendingOrderCount = 0; 
 
   final ProductController _productController = ProductController();
-  final OrderController _orderController = OrderController(); // 🔥 TAMBAHAN
+  final OrderController _orderController = OrderController(); 
 
   @override
   void initState() {
@@ -43,7 +35,6 @@ class _MyProductsPageState extends State<MyProductsPage> {
   }
 
   Future<void> _loadUser() async {
-    // delay kecil (opsional)
     await Future.delayed(const Duration(milliseconds: 100));
 
     final prefs = await SharedPreferences.getInstance();
@@ -56,7 +47,7 @@ class _MyProductsPageState extends State<MyProductsPage> {
       if (userId != null) {
         _futureMyProducts = _productController.fetchMyProducts(userId);
 
-        // 🔥 AMBIL DATA MY SALES (UNTUK BANNER)
+        //  Ambil data My Sales (Untuk Banner)
         _futureSales = _orderController.fetchSalesForUser(userId);
       } else {
         _futureMyProducts = Future.error(
@@ -70,7 +61,7 @@ class _MyProductsPageState extends State<MyProductsPage> {
     if (_userId == null) return;
     setState(() {
       _futureMyProducts = _productController.fetchMyProducts(_userId!);
-      _futureSales = _orderController.fetchSalesForUser(_userId!); // 🔥 REFRESH SALES
+      _futureSales = _orderController.fetchSalesForUser(_userId!); // refresh My Sales
     });
   }
 
@@ -101,7 +92,7 @@ class _MyProductsPageState extends State<MyProductsPage> {
   }
 
   Future<void> _deleteProduct(Product p) async {
-    // 🔥 CEK DULU: SUDAH ADA YANG PESAN?
+    // Cek apakah produk sudah terjual
     if (p.status == 'sold' || p.status == 'terjual') {
       showDialog(
         context: context,
@@ -142,7 +133,7 @@ class _MyProductsPageState extends State<MyProductsPage> {
 
     if (confirm != true) return;
 
-    // 🔥 HIDE PRODUK SECARA LOKAL
+    // Hide produk secara lokal
     ProductController.hideProductLocally(p.id);
 
     setState(() {
@@ -154,7 +145,7 @@ class _MyProductsPageState extends State<MyProductsPage> {
     ).showSnackBar(SnackBar(content: Text('"${p.name}" removed')));
   }
 
-  // ===== helper untuk badge status (ID -> EN) =====
+  // Status badge
   Widget _buildStatusBadge(String? status) {
     if (status == null || status.isEmpty) {
       return const SizedBox.shrink();
@@ -192,7 +183,6 @@ class _MyProductsPageState extends State<MyProductsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Tidak pakai AppBar bawaan, diganti header custom + background Mortava
       body: Container(
         decoration: MortavaDecorations.marketplaceBackgroundBox(),
         child: SafeArea(
@@ -200,7 +190,7 @@ class _MyProductsPageState extends State<MyProductsPage> {
             children: [
               const SizedBox(height: 12),
 
-              // ================= HEADER =================
+              // Header
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -229,7 +219,7 @@ class _MyProductsPageState extends State<MyProductsPage> {
               ),
               const SizedBox(height: 12),
 
-              // 🔥 HITUNG PENDING ORDER DARI MY SALES (BENAR)
+              // Hitung pending orders dari My Sales
               FutureBuilder<List<OrderModel>>(
                 future: _futureSales,
                 builder: (context, snapshot) {
@@ -259,7 +249,7 @@ class _MyProductsPageState extends State<MyProductsPage> {
                 },
               ),
 
-              // 🔥 BANNER INFO PESANAN (SELALU DI ATAS)
+              // Banner pending orders
               if (_pendingOrderCount > 0)
                 Padding(
                   padding: const EdgeInsets.symmetric(
@@ -291,7 +281,7 @@ class _MyProductsPageState extends State<MyProductsPage> {
                   ),
                 ),
 
-              // ================= LIST PRODUK =================
+              // List produk milik user
               Expanded(
                 child: (_futureMyProducts == null)
                     ? const Center(child: CircularProgressIndicator())
@@ -316,7 +306,7 @@ class _MyProductsPageState extends State<MyProductsPage> {
 
                           final allProducts = snapshot.data ?? [];
 
-                          // 🔥 PRODUK YANG BOLEH TAMPIL DI MY PRODUCTS
+                          // Produk yang ditampilkan adalah yang statusnya bukan 'ordered', 'processing', 'shipped'
                           final List<Product> products = allProducts
                               .where(
                                 (p) =>
@@ -469,7 +459,6 @@ class _MyProductsPageState extends State<MyProductsPage> {
                                                   ),
                                                 const SizedBox(height: 4),
 
-                                                // status badge (sudah di-translate)
                                                 _buildStatusBadge(p.status),
                                               ],
                                             ),

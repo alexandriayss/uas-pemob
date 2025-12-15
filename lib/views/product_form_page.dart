@@ -1,11 +1,3 @@
-// lib/views/product_form_page.dart
-//
-// Create/Edit Product Page dengan tema Mortava Shop:
-// - Background gradient cream–peach (MortavaDecorations.marketplaceBackgroundBox())
-// - Header custom (back + "Add product" / "Edit product")
-// - Card form dengan gradient lembut, input Poppins, tombol gradient
-// - Logic create/update tetap sama
-
 import 'dart:convert';
 import 'dart:io';
 
@@ -297,7 +289,7 @@ class _CreateEditProductPageState extends State<CreateEditProductPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // ================= HEADER =================
+                // header
                 Row(
                   children: [
                     IconButton(
@@ -334,7 +326,7 @@ class _CreateEditProductPageState extends State<CreateEditProductPage> {
                 ),
                 const SizedBox(height: 16),
 
-                // ================= CARD FORM =================
+                // form card
                 Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(24),

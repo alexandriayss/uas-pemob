@@ -1,10 +1,3 @@
-// lib/views/order_detail_page.dart
-//
-// Order Detail page dengan tema Mortava Shop + MortavaTheme:
-// - Background gradient pakai MortavaDecorations.marketplaceBackgroundBox()
-// - Warna teks utama pakai MortavaColors.darkText
-// - Harga produk pakai MortavaColors.primaryOrange
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -44,7 +37,6 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        // Full layar + gradient dari MortavaTheme
         constraints: const BoxConstraints.expand(),
         decoration: MortavaDecorations.marketplaceBackgroundBox(),
         child: SafeArea(
@@ -132,7 +124,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                           ),
                           const SizedBox(height: 18),
 
-                          // ============== CARD DETAIL ==============
+                          // Content card
                           Container(
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(24),
@@ -164,7 +156,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // ========= PRODUCT INFO =========
+                                // produk
                                 FutureBuilder<Product>(
                                   future: _productController
                                       .getProductDetail(o.productId),
@@ -255,7 +247,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                                   height: 24,
                                 ),
 
-                                // ========= SELLER & BUYER =========
+                                // seller & buyer
                                 if (o.sellerUsername != null &&
                                     o.sellerUsername!.isNotEmpty) ...[
                                   Text(
@@ -291,7 +283,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                                   const SizedBox(height: 10),
                                 ],
 
-                                // ========= ORDER INFO =========
+                                // order info
                                 Text(
                                   'Order Info',
                                   style: GoogleFonts.poppins(
@@ -334,7 +326,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                                   height: 24,
                                 ),
 
-                                // ========= SHIPPING ADDRESS =========
+                                // shipping address
                                 Text(
                                   'Shipping address',
                                   style: GoogleFonts.poppins(

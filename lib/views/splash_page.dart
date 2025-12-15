@@ -46,13 +46,12 @@ class _SplashPageState extends State<SplashPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        // Pakai tema gradient Mortava
         decoration: MortavaDecorations.marketplaceBackgroundBox(),
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // LOGO – sesuai path assets
+              // logo mortava
               SizedBox(
                 height: 130,
                 child: Image.asset(
@@ -63,7 +62,7 @@ class _SplashPageState extends State<SplashPage> {
 
               const SizedBox(height: 20),
 
-              // TEXT Mortava Shop
+              // app name
               Text(
                 "Mortava Shop",
                 style: MortavaTextStyles.headingLarge(),
@@ -78,7 +77,7 @@ class _SplashPageState extends State<SplashPage> {
 
               const SizedBox(height: 32),
 
-              // LOADING CIRCLE
+              // loading circle
               const CircularProgressIndicator(
                 color: Color(0xFFFF7043),
                 strokeWidth: 2.5,

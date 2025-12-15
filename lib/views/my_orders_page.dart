@@ -1,11 +1,3 @@
-// lib/views/my_orders_page.dart
-//
-// My Orders Page dengan tema Mortava Shop:
-// - Background pakai MortavaDecorations.marketplaceBackgroundBox()
-// - Header teks pakai MortavaColors.darkText
-// - Harga produk pakai MortavaColors.primaryOrange
-// - Card masih mempertahankan gradient lembut yang sama
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -106,7 +98,6 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // BACKGROUND GRADIENT dari MortavaTheme
       body: Container(
         decoration: MortavaDecorations.marketplaceBackgroundBox(),
         child: SafeArea(
@@ -114,7 +105,7 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
             children: [
               const SizedBox(height: 12),
 
-              // HEADER
+              // Header
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -179,7 +170,6 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(22),
 
-                              // BORDER lembut
                               border: Border.all(
                                 color: const Color(
                                   0xFFFFD9B3,
@@ -187,7 +177,6 @@ class _MyOrdersPageState extends State<MyOrdersPage> {
                                 width: 1.2,
                               ),
 
-                              // GRADIENT CARD lembut (dipertahankan)
                               gradient: const LinearGradient(
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,

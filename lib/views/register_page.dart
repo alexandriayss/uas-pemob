@@ -1,8 +1,3 @@
-// lib/views/register_page.dart
-//
-// Halaman register Mortava Shop dengan desain modern & premium,
-// mengikuti gaya LoginPage dan menggunakan MortavaTheme.
-
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -114,7 +109,6 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // BACKGROUND UTAMA (sama seperti login)
       body: Container(
         decoration: MortavaDecorations.authBackgroundBox(),
         child: SafeArea(
@@ -125,7 +119,7 @@ class _RegisterPageState extends State<RegisterPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // CARD REGISTER UTAMA
+                  // card register
                   Container(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 24, vertical: 28),

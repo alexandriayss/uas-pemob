@@ -1,4 +1,3 @@
-// lib/services/product_service.dart
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
@@ -8,7 +7,7 @@ import 'api_service.dart';
 class ProductService {
   final ApiService _api = ApiService();
 
-  // Dipakai di BERANDA (Marketplace)
+  // Ambil semua produk (dipakai di HomePage)
   Future<List<Product>> getAllProducts() async {
     final http.Response response = await _api.getRaw('/products');
 
@@ -32,10 +31,8 @@ class ProductService {
     }
   }
 
-  // Dipakai di "Produk Saya" (MyProductsPage)
+  // Dipakai di MyProductsPage
   Future<List<Product>> getMyProducts(int userId) async {
-    // endpoint PERSIS sama seperti di kode lamamu:
-    // http://mortava.biz.id/api/products/user/$_userId
     final http.Response response = await _api.getRaw('/products/user/$userId');
 
     if (response.statusCode == 200) {
@@ -55,7 +52,6 @@ class ProductService {
 
   // Hapus produk (dipanggil dari MyProductsPage)
   Future<void> deleteProduct(int productId) async {
-    // pakai URL yang sama kayak kode lama
     final url = Uri.parse('${ApiService.baseUrl}/products/$productId');
     final response = await http.delete(
       url,
@@ -76,17 +72,13 @@ class ProductService {
     }
   }
 
-  // AMBIL 1 PRODUK BERDASARKAN ID (dipakai di MyOrders)
+  // Detail produk by ID (dipakai di Product Detail Page)
   Future<Product> getProductById(int productId) async {
     final http.Response response = await _api.getRaw('/products/$productId');
 
     if (response.statusCode == 200) {
       final body = jsonDecode(response.body);
 
-      // Antisipasi:
-      // 1) langsung object
-      // 2) { "data": {...} }
-      // 3) { "product": {...} }
       Map<String, dynamic> map;
       if (body is Map && body['data'] is Map) {
         map = Map<String, dynamic>.from(body['data']);

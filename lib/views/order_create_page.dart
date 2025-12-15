@@ -1,11 +1,3 @@
-// lib/views/order_create_page.dart
-//
-// Order Create Page (Confirm Order) dengan tema Mortava:
-// - Background gradient cream–peach (MortavaDecorations.marketplaceBackgroundBox())
-// - Header custom dengan back button + "Confirm Order"
-// - Card ringkasan produk + card form alamat & payment
-// - Teks sebagian besar bahasa Inggris agar konsisten
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -102,10 +94,10 @@ class _OrderCreatePageState extends State<OrderCreatePage> {
 
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
 
-      // 🔥 PENTING: sembunyikan produk dari marketplace (frontend only)
+      // Sembunyikan produk yang sudah dipesan dari Marketplace secara lokal
       ProductController.hideProductLocally(widget.product.id);
 
-      // 🔥 kirim sinyal ke halaman sebelumnya (Marketplace)
+      // kirim sinyal ke halaman sebelumnya (Marketplace)
       Navigator.pop(context, true);
     } catch (e) {
       if (!mounted) return;
@@ -197,7 +189,7 @@ class _OrderCreatePageState extends State<OrderCreatePage> {
                 ),
                 const SizedBox(height: 16),
 
-                // ================= CARD RINGKASAN PRODUK =================
+                // Card ringkasan produk
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16,
@@ -264,7 +256,7 @@ class _OrderCreatePageState extends State<OrderCreatePage> {
 
                 const SizedBox(height: 20),
 
-                // ================= FORM =================
+                // Form alamat & payment
                 Text(
                   'Shipping address',
                   style: GoogleFonts.poppins(

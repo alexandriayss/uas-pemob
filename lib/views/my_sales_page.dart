@@ -1,11 +1,3 @@
-// lib/views/my_sales_page.dart
-//
-// My Sales Page dengan tema Mortava Shop + MortavaTheme:
-// - Background gradient cream–peach (MortavaDecorations.marketplaceBackgroundBox())
-// - Header custom (logo + "My Sales")
-// - Card penjualan pakai gradient & shadow lembut, font Poppins
-// - Teks dibuat bahasa Inggris agar konsisten dengan halaman lain
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -113,7 +105,7 @@ class _MySalesPageState extends State<MySalesPage> {
             children: [
               const SizedBox(height: 12),
 
-              // ================= HEADER =================
+              // Header
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

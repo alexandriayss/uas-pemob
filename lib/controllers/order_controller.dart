@@ -1,4 +1,3 @@
-// lib/controllers/order_controller.dart
 import '../models/order_model.dart';
 import '../services/order_service.dart';
 
@@ -15,12 +14,12 @@ class OrderController {
     return _service.getSalesForUser(userId);
   }
 
-  // DETAIL ORDER
+  // Order Detail
   Future<OrderModel> fetchOrderDetail(int orderId) {
     return _service.getOrderDetail(orderId);
   }
 
-  // BUAT ORDER BARU
+  // Create Order
   Future<String> createOrder({
     required int userId,
     required int productId,

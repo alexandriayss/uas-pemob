@@ -1,7 +1,5 @@
-// lib/services/user_service.dart
-//Service ini yang akan: baca data user dari SharedPreferences, menghapus data saat logout
+//Service: baca data user dari SharedPreferences, menghapus data saat logout
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../models/user_model.dart';
 
 class UserService {
@@ -11,7 +9,6 @@ class UserService {
     final id = prefs.getInt('user_id');
     final username = prefs.getString('username');
     final email = prefs.getString('email');
-    // nanti bisa tambahkan createdAt kalau kamu simpan saat login
 
     if (id == null || username == null || email == null) {
       return null;

@@ -1,8 +1,3 @@
-// lib/views/login_page.dart
-//
-// Halaman login Mortava Shop dengan desain modern & premium,
-// sekarang memakai MortavaTheme agar warna/gradient konsisten.
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -27,11 +22,10 @@ class _LoginPageState extends State<LoginPage> {
   bool _isLoading = false;
   bool _obscurePassword = true;
 
-  // 🔥 TAMBAHAN
   // Menyimpan pesan error agar tampil di dalam UI (tanpa Snackbar)
   String? _errorMessage;
 
-  // Fungsi login (logic tetap sama)
+  // Fungsi login 
   Future<void> _login() async {
     final identifier = _identifierC.text.trim();
     final password = _passwordC.text;
@@ -41,7 +35,6 @@ class _LoginPageState extends State<LoginPage> {
       _errorMessage = null; // reset error setiap login
     });
 
-    // 🔥 LOGIN SEKARANG TIDAK THROW EXCEPTION
     final error = await _authController.login(identifier, password);
 
     if (!mounted) return;
@@ -80,7 +73,7 @@ class _LoginPageState extends State<LoginPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // CARD LOGIN UTAMA
+                  // Card login
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 24,
@@ -129,11 +122,10 @@ class _LoginPageState extends State<LoginPage> {
                         const SizedBox(height: 6),
 
                         // Input Email
-                        // Input Email
                         TextField(
                           controller: _identifierC,
 
-                          // 🔥 TAMBAHAN INI (WAJIB)
+                          // Keyboard email
                           keyboardType: TextInputType.emailAddress,
 
                           decoration: MortavaInputs.roundedInput(
@@ -187,7 +179,7 @@ class _LoginPageState extends State<LoginPage> {
 
                         const SizedBox(height: 14),
 
-                        // 🔥 ERROR MESSAGE (SEPERTI REGISTER)
+                        // Tampilkan pesan error jika ada
                         if (_errorMessage != null)
                           Container(
                             width: double.infinity,

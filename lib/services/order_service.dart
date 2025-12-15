@@ -1,4 +1,3 @@
-// lib/services/order_service.dart
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
@@ -10,7 +9,6 @@ class OrderService {
 
   // Pesanan sebagai pembeli (My Orders)
   Future<List<OrderModel>> getOrdersForUser(int userId) async {
-    // sama seperti kode lama: pindahan dari _fetchOrders()
     final http.Response response = await _api.getRaw('/orders/buy/$userId');
 
     if (response.statusCode == 200) {
@@ -47,7 +45,7 @@ class OrderService {
     }
   }
 
-  // DETAIL ORDER (pindahan dari _fetchOrderDetail)
+  // Detail Order
   Future<OrderModel> getOrderDetail(int orderId) async {
     final http.Response response = await _api.getRaw('/orders/$orderId');
 
@@ -79,7 +77,7 @@ class OrderService {
     }
   }
 
-  // BUAT ORDER BARU
+  // Create Order
   Future<String> createOrder({
     required int userId,
     required int productId,
@@ -103,7 +101,6 @@ class OrderService {
       'payment_method': paymentMethod,
     };
 
-    // sama seperti kode lama kamu: POST ke /orders dengan JSON
     final http.Response response = await _api.postRaw(
       '/orders',
       jsonEncode(body),
@@ -123,7 +120,7 @@ class OrderService {
     }
   }
 
-  // COMPLETE ORDER (buyer)
+  // COMPLETE ORDER (buyer, nanti dipakai di orders)
   Future<void> completeOrder(int orderId) async {
     final response = await _api.patchRaw('/orders/$orderId/complete');
 

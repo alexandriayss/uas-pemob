@@ -1,10 +1,3 @@
-// lib/views/profile_page.dart
-//
-// Profile page dengan tema Mortava Shop + MortavaTheme.
-// - Background pakai MortavaDecorations.marketplaceBackgroundBox()
-// - Konten bisa di-scroll
-// - Tombol "Log out" fixed di bagian bawah.
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -77,14 +70,13 @@ class _ProfilePageState extends State<ProfilePage> {
         child: SafeArea(
           child: Column(
             children: [
-              // ===== Konten yang bisa di-scroll =====
               Expanded(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // ================= HEADER =================
+                      // header
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -122,7 +114,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                       const SizedBox(height: 22),
 
-                      // ================= CARD PROFILE =================
+                      // card profile
                       Container(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(26),
@@ -142,7 +134,6 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                           ],
                           border: Border.all(
-                            // pakai warna soft tanpa .withOpacity biar aman
                             color: Color(0xFFFFD9B3),
                             width: 1.1,
                           ),
@@ -219,7 +210,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
                       const SizedBox(height: 24),
 
-                      // ================= ACCOUNT INFO CARD =================
+                      // account info
                       Text(
                         'Account information',
                         style: GoogleFonts.poppins(
@@ -282,7 +273,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
               ),
 
-              // ================= LOGOUT BUTTON DI BAWAH =================
+              // logout button
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
                 child: SizedBox(

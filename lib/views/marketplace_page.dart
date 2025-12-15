@@ -1,8 +1,3 @@
-// lib/views/marketplace_page.dart
-//
-// Tema Baru: Campuran putih + kuning + oranye yang seimbang.
-// Sekarang memakai MortavaTheme untuk warna, gradient, dan card produk.
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -39,7 +34,6 @@ class _MarketplacePageState extends State<MarketplacePage> {
     return Scaffold(
       body: _pages[_currentIndex],
 
-      // BOTTOM NAV YANG CLEAN + PREMIUM
       bottomNavigationBar: Container(
         decoration: MortavaDecorations.bottomNavBox(),
         child: ClipRRect(
@@ -85,10 +79,7 @@ class _MarketplacePageState extends State<MarketplacePage> {
   }
 }
 
-//
-// ======================= BERANDA (GRID + SEARCH + FILTER HARGA) =========================
-//
-
+// BERANDA (GRID + SEARCH + FILTER HARGA)
 class _BerandaPage extends StatefulWidget {
   const _BerandaPage();
 
@@ -97,7 +88,6 @@ class _BerandaPage extends StatefulWidget {
 }
 
 class _BerandaPageState extends State<_BerandaPage> {
-  /// ❗ PERBAIKAN: TIDAK pakai `late`
   Future<List<Product>>? _futureProducts;
 
   final ProductController _productController = ProductController();
@@ -112,7 +102,6 @@ class _BerandaPageState extends State<_BerandaPage> {
   void initState() {
     super.initState();
 
-    // Inisialisasi pertama (AMAN)
     _futureProducts = _productController.fetchProductsFiltered(
       searchQuery: _searchQuery,
       priceRange: _selectedPriceRange,
@@ -125,7 +114,7 @@ class _BerandaPageState extends State<_BerandaPage> {
     super.dispose();
   }
 
-  /// ❗ PERBAIKAN UTAMA: reload HARUS pakai setState
+  // Reload produk dengan filter terbaru
   void _reloadProducts() {
     setState(() {
       _futureProducts = _productController.fetchProductsFiltered(
@@ -139,14 +128,13 @@ class _BerandaPageState extends State<_BerandaPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        // BACKGROUND CREAM PUTIH–KUNING
         decoration: MortavaDecorations.marketplaceBackgroundBox(),
         child: SafeArea(
           child: Column(
             children: [
               const SizedBox(height: 12),
 
-              // HEADER SIMPLE
+              // Header
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -177,7 +165,7 @@ class _BerandaPageState extends State<_BerandaPage> {
 
               const SizedBox(height: 12),
 
-              // SEARCH BAR
+              // Search bar
               Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 20,
@@ -221,7 +209,7 @@ class _BerandaPageState extends State<_BerandaPage> {
                 ),
               ),
 
-              // FILTER HARGA
+              // Filter harga
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 18),
                 child: Row(
@@ -237,7 +225,7 @@ class _BerandaPageState extends State<_BerandaPage> {
                 ),
               ),
 
-              // GRID PRODUK
+              // Produk grid
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
@@ -258,7 +246,6 @@ class _BerandaPageState extends State<_BerandaPage> {
                       ],
                     ),
                     child: FutureBuilder<List<Product>>(
-                      /// ❗ FALLBACK BIAR TIDAK PERNAH NULL
                       future:
                           _futureProducts ??
                           _productController.fetchProductsFiltered(
@@ -314,7 +301,7 @@ class _BerandaPageState extends State<_BerandaPage> {
 
                                 if (result == true && mounted) {
                                   setState(() {
-                                    _reloadProducts(); // 🔥 REFRESH MARKETPLACE
+                                    _reloadProducts(); // refresh produk setelah pembelian
                                   });
                                 }
                               },
@@ -361,10 +348,7 @@ class _BerandaPageState extends State<_BerandaPage> {
   }
 }
 
-//
-// ========================== CARD PRODUK EYE-CATCHING ==========================
-//
-
+// CARD PRODUK 
 class _ProductCard extends StatelessWidget {
   final Product product;
   const _ProductCard({required this.product});
@@ -557,10 +541,7 @@ class _ProductCard extends StatelessWidget {
   }
 }
 
-//
-// ====================== PROFIL WRAPPER =========================
-//
-
+// PROFIL WRAPPER 
 class _ProfilUserPage extends StatelessWidget {
   const _ProfilUserPage();
 

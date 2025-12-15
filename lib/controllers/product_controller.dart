@@ -1,12 +1,7 @@
-// lib/controllers/product_controller.dart
 import '../models/product_model.dart';
 import '../services/product_service.dart';
 
 /// Enum untuk filter range harga di marketplace
-/// - all: tanpa filter
-/// - zeroTo50k: 0 - 50.000
-/// - fiftyTo100k: 50.000 - 100.000
-/// - above100k: > 100.000
 enum PriceRange { all, zeroTo50k, fiftyTo100k, above100k }
 
 class ProductController {
@@ -22,23 +17,22 @@ class ProductController {
     final all = await _service.getMyProducts(userId);
 
     return all.where((p) {
-      // ❌ benar-benar dihapus
+      // benar-benar dihapus
       if (p.status == 'deleted') return false;
 
-      // ❌ sedang diproses pembeli (tidak boleh diutak-atik seller)
+      // sedang diproses pembeli (tidak boleh diutak-atik seller)
       if (p.status == 'ordered' ||
           p.status == 'procegit statusssing' ||
           p.status == 'shipped') {
         return false;
       }
 
-      // ❌ hide lokal (delete manual)
-      // 🔥 JANGAN hide produk yang sudah TERJUAL
+      // hide lokal (delete manual oleh user)
       if (ProductController.isProductHidden(p.id) && p.status != 'terjual') {
         return false;
       }
 
-      // ✅ available + sold tampil
+      // available + sold tampil
       return true;
     }).toList();
   }
@@ -59,16 +53,12 @@ class ProductController {
     return _productFutures[productId]!;
   }
 
-  // DETAIL PRODUK (dipakai ProductDetailPage)
+  // Product Detail
   Future<Product> getProductDetail(int productId) {
     return _service.getProductById(productId);
   }
 
-  // ===================================================================
-  //  F E A T U R E   B A R U
-  //  Fetch produk untuk marketplace dengan filter search + range harga.
-  //  Filtering dilakukan di sisi controller (bukan di view).
-  // ===================================================================
+  //  Fetch produk untuk marketplace dengan filter search + range harga
   Future<List<Product>> fetchProductsFiltered({
     String searchQuery = '',
     PriceRange priceRange = PriceRange.all,
@@ -104,15 +94,12 @@ class ProductController {
           break;
       }
 
-      // 🔥 TAMBAHAN (INI SAJA)
-      // produk yang sudah dibeli / habis TIDAK muncul di marketplace
-      // produk dianggap tersedia kalau:
-      // - status = null / tersedia / available
-      // - quantity TIDAK DIPAKSA (karena API sering null)
+      // produk yang sudah dibeli / habis tidak muncul di marketplace
+      // produk dianggap tersedia kalau: status = null / tersedia / available
       final bool isAvailable =
           p.status == null || p.status == 'tersedia' || p.status == 'available';
 
-      // produk yang di-hide secara lokal TIDAK muncul di marketplace
+      // produk yang di-hide secara lokal tidak muncul di marketplace
       if (ProductController.isProductHidden(p.id)) return false;
 
       return nameMatch && priceMatch && isAvailable;
@@ -120,11 +107,6 @@ class ProductController {
   }
 
   // // Soft delete product (ubah status jadi deleted)
-  // Future<void> softDeleteProduct(int productId) {
-  //   return _service.softDeleteProduct(productId);
-  // }
-
-  // ================= LOCAL SOFT DELETE (FRONTEND ONLY) =================
   static final Set<int> _hiddenProductIds = {};
 
   // dipanggil saat user "hapus" produk

@@ -1,9 +1,4 @@
-// lib/theme/mortava_theme.dart
-//
-// Tema global Mortava Shop:
-// - Kumpulan warna, gradient, text style, dan dekorasi input/card
-// - Dipakai oleh login, register, dan marketplace agar konsisten.
-
+// Tema global Mortava Shop 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -52,8 +47,8 @@ class MortavaGradients {
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
     colors: [
-      Color(0xFFFFE6C5), // peach lebih pekat
-      Color(0xFFFFCC8F), // warm orange mewah
+      Color(0xFFFFE6C5), // peach
+      Color(0xFFFFCC8F), // warm orange 
     ],
   );
 
@@ -127,7 +122,7 @@ class MortavaDecorations {
         ],
       );
 
-  // Card register sama dengan card login (dipisah biar gampang kalau mau beda nanti)
+  // Card register sama dengan card login 
   static BoxDecoration registerCardBox() => authCardBox();
 
   // Outer card produk (frame gradient)

@@ -1,17 +1,10 @@
-// lib/views/product_detail_page.dart
-//
-// Product Detail Page (refined) dengan MortavaTheme
-// - Background pakai gradient marketplace MortavaTheme
-// - Tombol "BUY NOW" pakai gradient primary MortavaTheme
-// - Warna teks utama pakai MortavaColors.darkText
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../models/product_model.dart';
-import '../models/user_model.dart'; // 🔥 TAMBAHAN
+import '../models/user_model.dart'; 
 import '../controllers/product_controller.dart';
-import '../controllers/user_controller.dart'; // 🔥 TAMBAHAN
+import '../controllers/user_controller.dart'; 
 import '../theme/mortava_theme.dart';
 import 'order_create_page.dart';
 
@@ -28,7 +21,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   late Future<Product> _futureProduct;
   final ProductController _productController = ProductController();
 
-  // 🔥 TAMBAHAN
   final UserController _userController = UserController();
   UserModel? _currentUser;
 
@@ -36,7 +28,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   void initState() {
     super.initState();
     _futureProduct = _productController.getProductDetail(widget.productId);
-    _loadUser(); // 🔥 TAMBAHAN
+    _loadUser(); 
   }
 
   Future<void> _loadUser() async {
@@ -56,7 +48,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
     return Scaffold(
       body: Container(
-        // Background pakai tema marketplace (cream–peach lembut)
         decoration: MortavaDecorations.marketplaceBackgroundBox(),
         child: SafeArea(
           top: true,
@@ -88,12 +79,10 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
               final p = snapshot.data!;
 
-              // 🔥 TAMBAHAN
               // cek apakah produk milik user sendiri
               final bool isOwner =
                   _currentUser != null && p.userId == _currentUser!.id;
 
-              // stok sesuai logic kamu
               // produk dianggap habis HANYA jika benar-benar sold / terjual
               final bool inStock =
                   (p.quantity == null || p.quantity! > 0) &&
@@ -116,7 +105,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // ------------ BACK BUTTON ------------
+                    // back button
                     Align(
                       alignment: Alignment.centerLeft,
                       child: IconButton(
@@ -125,7 +114,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       ),
                     ),
 
-                    // ------------ TITLE ------------
+                    // title
                     Center(
                       child: Text(
                         'Product Details',
@@ -151,7 +140,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                     ),
                     const SizedBox(height: 20),
 
-                    // ------------ MAIN CARD ------------
+                    // main card
                     Container(
                       padding: const EdgeInsets.all(18),
                       decoration: BoxDecoration(
@@ -172,7 +161,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // ------------ IMAGE ------------
+                          // image
                           ClipRRect(
                             borderRadius: BorderRadius.circular(22),
                             child: AspectRatio(
@@ -196,7 +185,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                           ),
                           const SizedBox(height: 18),
 
-                          // ------------ NAME + PRICE ------------
+                          // name + price
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -240,7 +229,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                           Container(height: 1, color: Colors.grey.shade500),
                           const SizedBox(height: 18),
 
-                          // ------------ DESCRIPTION ------------
+                          // description
                           Text(
                             'Description',
                             style: GoogleFonts.poppins(
@@ -264,7 +253,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                           ),
                           const SizedBox(height: 20),
 
-                          // ------------ STOCK ------------
+                          //  stock status
                           Text(
                             'Stock',
                             style: GoogleFonts.poppins(
@@ -320,7 +309,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
                     const SizedBox(height: 24),
 
-                    // ------------ BUY NOW BUTTON ------------
+                    // buy button
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
@@ -334,10 +323,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                 );
 
                                 if (result == true && mounted) {
-                                  // 🔥 INI YANG KURANG DARI AWAL
-                                  // ProductController.hideProductLocally(p.id);
 
-                                  // 🔥 KASIH SINYAL KE MARKETPLACE
+                                  // refresh page setelah pembelian berhasil
                                   Navigator.pop(context, true);
                                 }
                               }

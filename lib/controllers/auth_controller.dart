@@ -1,18 +1,16 @@
-// lib/controllers/auth_controller.dart
 import '../services/auth_service.dart';
 
 class AuthController {
   final AuthService _service = AuthService();
 
-  /// return null = login sukses
-  /// return String = pesan error untuk UI
+  // return null = login sukses, return String = pesan error untuk UI
   Future<String?> login(String email, String password) async {
-    // 🔥 VALIDASI KOSONG
+    // Validasi input kosong
     if (email.isEmpty || password.isEmpty) {
       return 'Email and password are required';
     }
 
-    // 🔥 VALIDASI EMAIL SAJA (WAJIB EMAIL)
+    // Validasi format email dasar
     final emailRegex =
         RegExp(r'^[\w\.-]+@([\w-]+\.)+[\w-]{2,4}$');
 
@@ -22,36 +20,36 @@ class AuthController {
 
     try {
       await _service.login(
-        identifier: email, // tetap kirim ke backend
+        identifier: email, 
         password: password,
       );
 
-      // ✅ sukses
+      // sukses
       return null;
     } catch (e) {
       final msg = e.toString().toLowerCase();
 
-      // 🔥 SALAH EMAIL / PASSWORD
+      // salah password / email
       if (msg.contains('401') ||
           msg.contains('unauthorized') ||
           msg.contains('invalid')) {
         return 'Incorrect email or password';
       }
 
-      // 🔥 USER TIDAK DITEMUKAN
+      //  user tidak ditemukan
       if (msg.contains('not found') ||
           msg.contains('user')) {
         return 'Account not found';
       }
 
-      // 🔥 INTERNET / SERVER
+      // tidak ada koneksi internet
       if (msg.contains('network') ||
           msg.contains('socket') ||
           msg.contains('timeout')) {
         return 'No internet connection';
       }
 
-      // 🔥 FALLBACK AMAN
+      // error lain
       return 'Incorrect email or password';
     }
   }
